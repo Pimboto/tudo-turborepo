@@ -1,0 +1,181 @@
+// This is your Prisma schema file
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  clerkId       String    @unique
+  role          UserRole  @default(CLIENT)
+  verified      Boolean   @default(false)
+  referralCode  String?   @unique
+  credits       Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  profile       Profile?
+  partner       Partner?
+  bookings      Booking[]
+  notifications Notification[]
+  referredById  String?
+  referredBy    User?     @relation("Referrals", fields: [referredById], references: [id])
+  referrals     User[]    @relation("Referrals")
+}
+
+enum UserRole {
+  CLIENT
+  PARTNER
+  ADMIN
+}
+
+model Profile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  fullName     String
+  phone        String?
+  avatarUrl    String?
+  address      String?
+  preferences  Json     @default("{}")
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Partner {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  companyName     String
+  taxInfo         String?
+  isVerified      Boolean   @default(false)
+  verifiedAt      DateTime?
+  verifiedBy      String?
+  commissionRate  Float     @default(0.15)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studios         Studio[]
+}
+
+model Studio {
+  id             String    @id @default(cuid())
+  partnerId      String
+  name           String
+  description    String
+  address        String
+  lat            Float
+  lng            Float
+  amenities      Json      @default("[]")
+  photos         Json      @default("[]")
+  rating         Float     @default(0)
+  totalReviews   Int       @default(0)
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  partner        Partner   @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  classes        Class[]
+}
+
+model Class {
+  id              String    @id @default(cuid())
+  studioId        String
+  title           String
+  description     String
+  type            String
+  durationMinutes Int
+  maxCapacity     Int
+  basePrice       Float
+  photos          Json      @default("[]")
+  amenities       Json      @default("[]")
+  status          ClassStatus @default(DRAFT)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  studio          Studio    @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  sessions        Session[]
+}
+
+enum ClassStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+model Session {
+  id              String    @id @default(cuid())
+  classId         String
+  startTime       DateTime
+  endTime         DateTime
+  instructorName  String
+  actualCapacity  Int       @default(0)
+  status          SessionStatus @default(SCHEDULED)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  class           Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
+  bookings        Booking[]
+}
+
+enum SessionStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Booking {
+  id            String    @id @default(cuid())
+  userId        String
+  sessionId     String
+  bookingCode   String    @unique @default(cuid())
+  status        BookingStatus @default(CONFIRMED)
+  checkedInAt   DateTime?
+  amountPaid    Float     @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  user          User      @relation(fields: [userId], references: [id])
+  session       Session   @relation(fields: [sessionId], references: [id])
+  
+  @@unique([userId, sessionId])
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SystemMetrics {
+  id              String    @id @default(cuid())
+  date            DateTime  @unique
+  totalUsers      Int
+  totalPartners   Int
+  totalStudios    Int
+  totalBookings   Int
+  totalRevenue    Float
+  activeUsers     Int
+  createdAt       DateTime  @default(now())
+}
