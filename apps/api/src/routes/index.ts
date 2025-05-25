@@ -1,4 +1,4 @@
-// src/routes/index.ts
+// src/routes/index.ts - CORREGIDO con tipo explícito
 import { Router } from 'express';
 import authRoutes from './auth.routes';
 import userRoutes from './user.routes';
@@ -8,7 +8,7 @@ import classRoutes from './class.routes';
 import bookingRoutes from './booking.routes';
 import adminRoutes from './admin.routes';
 
-const router = Router();
+const router: Router = Router();
 
 // Mount routes
 router.use('/auth', authRoutes);

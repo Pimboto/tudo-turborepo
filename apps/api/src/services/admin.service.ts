@@ -81,7 +81,7 @@ export class AdminService {
       pendingPartners,
       totalStudios,
       totalBookings,
-      totalRevenue: revenueData._sum.amountPaid ?? 0,
+      totalRevenue: revenueData._sum.amountPaid || 0,
       activeUsers,
       recentMetrics: dailyMetrics as any,
     };
@@ -152,7 +152,7 @@ export class AdminService {
         totalPartners,
         totalStudios,
         totalBookings,
-        totalRevenue: revenueData._sum.amountPaid ?? 0,
+        totalRevenue: revenueData._sum.amountPaid || 0,
         activeUsers,
       },
       update: {
@@ -160,7 +160,7 @@ export class AdminService {
         totalPartners,
         totalStudios,
         totalBookings,
-        totalRevenue: revenueData._sum.amountPaid ?? 0,
+        totalRevenue: revenueData._sum.amountPaid || 0,
         activeUsers,
       },
     });
@@ -171,8 +171,8 @@ export class AdminService {
     page?: number;
     limit?: number;
   }) {
-    const page = options?.page ?? 1;
-    const limit = options?.limit ?? 20;
+    const page = options?.page || 1;
+    const limit = options?.limit || 20;
     const skip = (page - 1) * limit;
 
     const [partners, total] = await Promise.all([
@@ -255,8 +255,8 @@ export class AdminService {
     role?: string;
     search?: string;
   }) {
-    const page = options?.page ?? 1;
-    const limit = options?.limit ?? 20;
+    const page = options?.page || 1;
+    const limit = options?.limit || 20;
     const skip = (page - 1) * limit;
 
     const where: any = {};

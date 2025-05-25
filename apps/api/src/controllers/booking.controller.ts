@@ -1,4 +1,4 @@
-// src/controllers/booking.controller.ts
+// src/controllers/booking.controller.ts - CORREGIDO tipos de parámetros
 import { Response, Request } from 'express';
 import { AuthenticatedRequest } from '../types';
 import { BookingService } from '../services/booking.service';
@@ -8,7 +8,7 @@ import { prisma } from '../prisma/client';
 
 export class BookingController {
   // Create booking
-  static async create(req: AuthenticatedRequest, res: Response) {
+  static async create(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const booking = await BookingService.createBooking(userId, req.body);
     
@@ -18,7 +18,7 @@ export class BookingController {
   }
 
   // Get booking by ID
-  static async getById(req: AuthenticatedRequest, res: Response) {
+  static async getById(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const { id } = req.params;
     
@@ -28,7 +28,7 @@ export class BookingController {
   }
 
   // Cancel booking
-  static async cancel(req: AuthenticatedRequest, res: Response) {
+  static async cancel(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const { id } = req.params;
     
@@ -38,7 +38,7 @@ export class BookingController {
   }
 
   // Check-in
-  static async checkIn(req: AuthenticatedRequest, res: Response) {
+  static async checkIn(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const { id } = req.params;
     
@@ -48,7 +48,7 @@ export class BookingController {
   }
 
   // Get booking QR data
-  static async getQRData(req: AuthenticatedRequest, res: Response) {
+  static async getQRData(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const { id } = req.params;
     
@@ -58,7 +58,7 @@ export class BookingController {
   }
 
   // Get booking by code (Partner)
-  static async getByCode(req: AuthenticatedRequest, res: Response) {
+  static async getByCode(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const { code } = req.params;
     
@@ -82,7 +82,7 @@ export class BookingController {
   }
 
   // Check-in by code (Partner)
-  static async checkInByCode(req: AuthenticatedRequest, res: Response) {
+  static async checkInByCode(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const { code } = req.params;
     
@@ -100,7 +100,7 @@ export class BookingController {
   }
 
   // Mark no-shows for a session (Partner)
-  static async markNoShows(req: AuthenticatedRequest, res: Response) {
+  static async markNoShows(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const { sessionId } = req.params;
     
@@ -118,10 +118,10 @@ export class BookingController {
   }
 
   // Get available sessions for booking (Public)
-  static async getAvailableSessions(req: Request, res: Response) {
+  static async getAvailableSessions(req: Request, res: Response): Promise<void> {
     const { studioId, classId, date } = req.query;
     
-    const where: any = {
+    const where: Record<string, any> = {
       status: 'SCHEDULED',
       startTime: { gte: new Date() },
       class: {
@@ -180,7 +180,7 @@ export class BookingController {
   }
 
   // Validate booking code (Public - for QR scanning)
-  static async validateCode(req: Request, res: Response) {
+  static async validateCode(req: Request, res: Response): Promise<void> {
     const { code } = req.params;
     
     try {
@@ -213,10 +213,11 @@ export class BookingController {
       });
 
       if (!booking) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           error: 'Invalid booking code',
         });
+        return;
       }
 
       res.json(successResponse({

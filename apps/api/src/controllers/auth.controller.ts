@@ -1,4 +1,4 @@
-// src/controllers/auth.controller.ts
+// src/controllers/auth.controller.ts - CORREGIDO
 import { Request, Response } from 'express';
 import { prisma } from '../prisma/client';
 import { AppError } from '../middleware/errorHandler';
@@ -8,7 +8,7 @@ import { UserRole } from '@prisma/client';
 
 export class AuthController {
   // Register a new user
-  static async register(req: Request, res: Response) {
+  static async register(req: Request, res: Response): Promise<void> {
     const { email, clerkId, role = 'CLIENT', referralCode } = req.body as CreateUserDto;
 
     // Check if user already exists
@@ -21,7 +21,7 @@ export class AuthController {
     }
 
     // Validate referral code if provided
-    let referredBy = null;
+    let referredBy: string | null = null;
     if (referralCode) {
       const referrer = await prisma.user.findUnique({
         where: { referralCode },
@@ -94,7 +94,7 @@ export class AuthController {
   }
 
   // Verify user email/phone
-  static async verify(req: Request, res: Response) {
+  static async verify(req: Request, res: Response): Promise<void> {
     const { clerkId } = req.body;
 
     const user = await prisma.user.update({
@@ -111,7 +111,7 @@ export class AuthController {
   }
 
   // Get current user info
-  static async me(req: Request, res: Response) {
+  static async me(req: Request, res: Response): Promise<void> {
     const clerkId = req.headers['x-clerk-user-id'] as string;
 
     if (!clerkId) {
@@ -140,7 +140,7 @@ export class AuthController {
   }
 
   // Delete user account
-  static async deleteAccount(req: Request, res: Response) {
+  static async deleteAccount(req: Request, res: Response): Promise<void> {
     const clerkId = req.headers['x-clerk-user-id'] as string;
 
     await prisma.user.delete({

@@ -1,4 +1,4 @@
-// src/services/studio.service.ts
+// src/services/studio.service.ts - CORREGIDO
 import { prisma } from '../prisma/client';
 import { AppError } from '../middleware/errorHandler';
 import { CreateStudioDto, UpdateStudioDto, SearchFilters } from '../types';
@@ -108,11 +108,14 @@ export class StudioService {
   }
 
   // Search studios
-  static async searchStudios(filters: SearchFilters, pagination: { page: number; limit: number }) {
+  static async searchStudios(
+    filters: SearchFilters, 
+    pagination: { page: number; limit: number }
+  ) {
     const { page, limit } = pagination;
     const skip = (page - 1) * limit;
 
-    const where: any = {
+    const where: Record<string, any> = {
       isActive: true,
     };
 
@@ -192,21 +195,26 @@ export class StudioService {
     ]);
 
     // Calculate distance if searching by location
-    if (filters.lat && filters.lng) {
-      studios.forEach((studio: any) => {
-        studio.distance = calculateDistance(
-          filters.lat!,
-          filters.lng!,
+    const studiosWithDistance = studios.map((studio) => {
+      let distance = undefined;
+      if (filters.lat && filters.lng) {
+        distance = calculateDistance(
+          filters.lat,
+          filters.lng,
           studio.lat,
           studio.lng
         );
-      });
-      // Sort by distance
-      studios.sort((a: any, b: any) => a.distance - b.distance);
+      }
+      return { ...studio, distance };
+    });
+
+    // Sort by distance if available
+    if (filters.lat && filters.lng) {
+      studiosWithDistance.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
 
     return {
-      studios,
+      studios: studiosWithDistance,
       pagination: {
         page,
         limit,
@@ -227,7 +235,7 @@ export class StudioService {
     const limit = options?.limit ?? 20;
     const skip = (page - 1) * limit;
 
-    const where = {
+    const where: Record<string, any> = {
       studioId,
       ...(options?.status && { status: options.status }),
       ...(options?.type && { type: options.type }),

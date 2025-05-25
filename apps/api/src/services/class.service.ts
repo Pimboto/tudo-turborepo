@@ -1,4 +1,4 @@
-// src/services/class.service.ts
+// src/services/class.service.ts - CORREGIDO
 import { prisma } from '../prisma/client';
 import { AppError } from '../middleware/errorHandler';
 import { CreateClassDto, CreateSessionDto } from '../types';
@@ -82,6 +82,64 @@ export class ClassService {
     return classData;
   }
 
+  // Create session
+  static async createSession(classId: string, partnerId: string, data: CreateSessionDto) {
+    // Verify ownership
+    const classData = await prisma.class.findFirst({
+      where: {
+        id: classId,
+        studio: { partnerId },
+      },
+    });
+
+    if (!classData) {
+      throw new AppError(404, 'Class not found or access denied');
+    }
+
+    if (classData.status !== 'PUBLISHED') {
+      throw new AppError(400, 'Class must be published to create sessions');
+    }
+
+    const startTime = new Date(data.startTime);
+    const endTime = calculateEndTime(startTime, classData.durationMinutes);
+
+    // Check for conflicting sessions
+    const conflict = await prisma.session.findFirst({
+      where: {
+        class: {
+          studioId: classData.studioId,
+        },
+        status: 'SCHEDULED',
+        OR: [
+          {
+            startTime: { lte: startTime },
+            endTime: { gt: startTime },
+          },
+          {
+            startTime: { lt: endTime },
+            endTime: { gte: endTime },
+          },
+        ],
+      },
+    });
+
+    if (conflict) {
+      throw new AppError(400, 'Session conflicts with existing session');
+    }
+
+    const session = await prisma.session.create({
+      data: {
+        classId,
+        startTime,
+        endTime,
+        instructorName: data.instructorName,
+        status: 'SCHEDULED',
+      },
+    });
+
+    return session;
+  }
+
   // Update class
   static async updateClass(classId: string, partnerId: string, data: Partial<CreateClassDto>) {
     // Verify ownership
@@ -163,68 +221,12 @@ export class ClassService {
 
     const updated = await prisma.class.update({
       where: { id: classId },
-      data: { status: status as any },
+      data: { 
+        status: status as 'DRAFT' | 'PENDING_REVIEW' | 'PUBLISHED' | 'ARCHIVED' 
+      },
     });
 
     return updated;
-  }
-
-  // Create session
-  static async createSession(classId: string, partnerId: string, data: CreateSessionDto) {
-    // Verify ownership
-    const classData = await prisma.class.findFirst({
-      where: {
-        id: classId,
-        studio: { partnerId },
-      },
-    });
-
-    if (!classData) {
-      throw new AppError(404, 'Class not found or access denied');
-    }
-
-    if (classData.status !== 'PUBLISHED') {
-      throw new AppError(400, 'Class must be published to create sessions');
-    }
-
-    const startTime = new Date(data.startTime);
-    const endTime = calculateEndTime(startTime, classData.durationMinutes);
-
-    // Check for conflicting sessions
-    const conflict = await prisma.session.findFirst({
-      where: {
-        class: {
-          studioId: classData.studioId,
-        },
-        status: 'SCHEDULED',
-        OR: [
-          {
-            startTime: { lte: startTime },
-            endTime: { gt: startTime },
-          },
-          {
-            startTime: { lt: endTime },
-            endTime: { gte: endTime },
-          },
-        ],
-      },
-    });
-
-    if (conflict) {
-      throw new AppError(400, 'Session conflicts with existing session');
-    }
-
-    const session = await prisma.session.create({
-      data: {
-        classId,
-        startTime,
-        endTime,
-        instructorName: data.instructorName,
-        status: 'SCHEDULED',
-      },
-    });
-
-    return session;
   }
 
   // Get sessions for a class
@@ -239,7 +241,7 @@ export class ClassService {
     const limit = options?.limit ?? 20;
     const skip = (page - 1) * limit;
 
-    const where = {
+    const where: Record<string, any> = {
       classId,
       ...(options?.status && { status: options.status }),
       ...(options?.fromDate && options?.toDate && {
@@ -360,8 +362,8 @@ export class ClassService {
         durationMinutes: original.durationMinutes,
         maxCapacity: original.maxCapacity,
         basePrice: original.basePrice,
-        photos: original.photos as any,
-        amenities: original.amenities as any,
+        photos: original.photos as string[],
+        amenities: original.amenities as string[],
         status: 'DRAFT',
       },
     });

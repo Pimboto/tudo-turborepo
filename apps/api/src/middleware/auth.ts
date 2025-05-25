@@ -1,4 +1,4 @@
-// src/middleware/auth.ts
+// src/middleware/auth.ts - CORREGIDO
 import { Response, NextFunction } from 'express';
 import { clerkClient } from '@clerk/clerk-sdk-node';
 import { AuthenticatedRequest } from '../types';
@@ -9,7 +9,7 @@ export const authenticate = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     // Get the auth token from header
     const authHeader = req.headers.authorization;
@@ -46,12 +46,13 @@ export const authenticate = async (
     next();
   } catch (error) {
     if (error instanceof AppError) {
-      return res.status(error.statusCode).json({ 
+      res.status(error.statusCode).json({ 
         success: false, 
         error: error.message 
       });
+      return;
     }
-    return res.status(401).json({ 
+    res.status(401).json({ 
       success: false, 
       error: 'Authentication failed' 
     });
@@ -60,19 +61,21 @@ export const authenticate = async (
 
 // Middleware to check if user has specific role
 export const authorize = (...roles: string[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      return res.status(401).json({ 
+      res.status(401).json({ 
         success: false, 
         error: 'Not authenticated' 
       });
+      return;
     }
 
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ 
+      res.status(403).json({ 
         success: false, 
         error: 'Insufficient permissions' 
       });
+      return;
     }
 
     next();
@@ -84,12 +87,13 @@ export const requireVerified = (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-) => {
+): void => {
   if (!req.user?.verified) {
-    return res.status(403).json({ 
+    res.status(403).json({ 
       success: false, 
       error: 'Account not verified' 
     });
+    return;
   }
   next();
 };
@@ -99,11 +103,12 @@ export const optionalAuth = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
-      return next();
+      next();
+      return;
     }
 
     const token = authHeader.split(' ')[1];

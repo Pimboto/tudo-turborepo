@@ -1,5 +1,5 @@
 // src/types/index.ts
-import { User, UserRole } from '@prisma/client';
+import { UserRole } from '@prisma/client';
 import { Request } from 'express';
 
 // Extend Express Request with authenticated user
@@ -8,6 +8,7 @@ export interface AuthenticatedRequest extends Request {
     id: string;
     clerkId: string;
     role: UserRole;
+    verified: boolean;
   };
 }
 
@@ -15,7 +16,7 @@ export interface AuthenticatedRequest extends Request {
 export interface CreateUserDto {
   email: string;
   clerkId: string;
-  role: UserRole;
+  role?: UserRole;
   referralCode?: string;
 }
 
@@ -63,7 +64,7 @@ export interface CreateClassDto {
 }
 
 export interface CreateSessionDto {
-  startTime: Date;
+  startTime: string | Date;
   instructorName: string;
 }
 

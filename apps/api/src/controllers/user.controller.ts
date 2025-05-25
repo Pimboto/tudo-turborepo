@@ -1,5 +1,6 @@
-// src/controllers/user.controller.ts
+// src/controllers/user.controller.ts - CORREGIDO (mover import al inicio)
 import { Response } from 'express';
+import { prisma } from '../prisma/client';
 import { AuthenticatedRequest } from '../types';
 import { UserService } from '../services/user.service';
 import { successResponse, getPagination } from '../utils/helpers';
@@ -7,7 +8,7 @@ import { AppError } from '../middleware/errorHandler';
 
 export class UserController {
   // Get user profile
-  static async getProfile(req: AuthenticatedRequest, res: Response) {
+  static async getProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const user = await UserService.getUserById(userId);
     
@@ -15,7 +16,7 @@ export class UserController {
   }
 
   // Update user profile
-  static async updateProfile(req: AuthenticatedRequest, res: Response) {
+  static async updateProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const profile = await UserService.updateProfile(userId, req.body);
     
@@ -23,7 +24,7 @@ export class UserController {
   }
 
   // Get user bookings
-  static async getBookings(req: AuthenticatedRequest, res: Response) {
+  static async getBookings(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const { page, limit } = getPagination(req.query);
     const status = req.query.status as string | undefined;
@@ -38,7 +39,7 @@ export class UserController {
   }
 
   // Get user notifications
-  static async getNotifications(req: AuthenticatedRequest, res: Response) {
+  static async getNotifications(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const { page, limit } = getPagination(req.query);
     const unreadOnly = req.query.unreadOnly === 'true';
@@ -53,7 +54,7 @@ export class UserController {
   }
 
   // Mark notification as read
-  static async markNotificationRead(req: AuthenticatedRequest, res: Response) {
+  static async markNotificationRead(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const { id } = req.params;
 
@@ -63,7 +64,7 @@ export class UserController {
   }
 
   // Mark all notifications as read
-  static async markAllNotificationsRead(req: AuthenticatedRequest, res: Response) {
+  static async markAllNotificationsRead(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
 
     await prisma.notification.updateMany({
@@ -80,7 +81,7 @@ export class UserController {
   }
 
   // Get referral info
-  static async getReferralInfo(req: AuthenticatedRequest, res: Response) {
+  static async getReferralInfo(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const stats = await UserService.getReferralStats(userId);
     
@@ -88,7 +89,7 @@ export class UserController {
   }
 
   // Get user preferences
-  static async getPreferences(req: AuthenticatedRequest, res: Response) {
+  static async getPreferences(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     
     const profile = await prisma.profile.findUnique({
@@ -104,7 +105,7 @@ export class UserController {
   }
 
   // Update user preferences
-  static async updatePreferences(req: AuthenticatedRequest, res: Response) {
+  static async updatePreferences(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const { amenities, classTypes, zones } = req.body;
 
@@ -123,14 +124,14 @@ export class UserController {
   }
 
   // Get booking history
-  static async getBookingHistory(req: AuthenticatedRequest, res: Response) {
+  static async getBookingHistory(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const { page, limit } = getPagination(req.query);
 
     const where = {
       userId,
       status: {
-        in: ['COMPLETED', 'CANCELLED', 'NO_SHOW'],
+        in: ['COMPLETED', 'CANCELLED', 'NO_SHOW'] as const,
       },
     };
 
@@ -169,18 +170,18 @@ export class UserController {
   }
 
   // Get upcoming classes
-  static async getUpcomingClasses(req: AuthenticatedRequest, res: Response) {
+  static async getUpcomingClasses(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
     const { page, limit } = getPagination(req.query);
 
     const where = {
       userId,
-      status: 'CONFIRMED',
+      status: 'CONFIRMED' as const,
       session: {
         startTime: {
           gte: new Date(),
         },
-        status: 'SCHEDULED',
+        status: 'SCHEDULED' as const,
       },
     };
 
@@ -225,7 +226,7 @@ export class UserController {
   }
 
   // Get user stats
-  static async getUserStats(req: AuthenticatedRequest, res: Response) {
+  static async getUserStats(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
 
     const [
@@ -234,7 +235,6 @@ export class UserController {
       cancelledBookings,
       upcomingBookings,
       totalCredits,
-      favoriteStudio,
     ] = await Promise.all([
       prisma.booking.count({ where: { userId } }),
       prisma.booking.count({ where: { userId, status: 'COMPLETED' } }),
@@ -249,13 +249,6 @@ export class UserController {
         } 
       }),
       prisma.user.findUnique({ where: { id: userId }, select: { credits: true } }),
-      prisma.booking.groupBy({
-        by: ['sessionId'],
-        where: { userId, status: 'COMPLETED' },
-        _count: true,
-        orderBy: { _count: { sessionId: 'desc' } },
-        take: 1,
-      }),
     ]);
 
     res.json(successResponse({
@@ -270,6 +263,3 @@ export class UserController {
     }));
   }
 }
-
-// Import prisma at the top of the file
-import { prisma } from '../prisma/client';
