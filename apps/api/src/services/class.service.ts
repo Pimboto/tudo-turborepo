@@ -1,19 +1,23 @@
 // src/services/class.service.ts - CORREGIDO
-import { prisma } from '../prisma/client';
-import { AppError } from '../middleware/errorHandler';
-import { CreateClassDto, CreateSessionDto } from '../types';
-import { calculateEndTime } from '../utils/helpers';
+import { prisma } from "../prisma/client";
+import { AppError } from "../middleware/errorHandler";
+import { CreateClassDto, CreateSessionDto } from "../types";
+import { calculateEndTime } from "../utils/helpers";
 
 export class ClassService {
   // Create class
-  static async createClass(studioId: string, partnerId: string, data: CreateClassDto) {
+  static async createClass(
+    studioId: string,
+    partnerId: string,
+    data: CreateClassDto
+  ) {
     // Verify studio belongs to partner
     const studio = await prisma.studio.findFirst({
       where: { id: studioId, partnerId },
     });
 
     if (!studio) {
-      throw new AppError(404, 'Studio not found or access denied');
+      throw new AppError(404, "Studio not found or access denied");
     }
 
     const newClass = await prisma.class.create({
@@ -27,7 +31,7 @@ export class ClassService {
         basePrice: data.basePrice,
         photos: data.photos,
         amenities: data.amenities,
-        status: 'DRAFT',
+        status: "DRAFT",
       },
     });
 
@@ -50,17 +54,17 @@ export class ClassService {
         },
         sessions: {
           where: {
-            status: 'SCHEDULED',
+            status: "SCHEDULED",
             startTime: { gte: new Date() },
           },
-          orderBy: { startTime: 'asc' },
+          orderBy: { startTime: "asc" },
           take: 10,
           include: {
             _count: {
               select: {
                 bookings: {
                   where: {
-                    status: { in: ['CONFIRMED', 'COMPLETED'] },
+                    status: { in: ["CONFIRMED", "COMPLETED"] },
                   },
                 },
               },
@@ -76,14 +80,18 @@ export class ClassService {
     });
 
     if (!classData) {
-      throw new AppError(404, 'Class not found');
+      throw new AppError(404, "Class not found");
     }
 
     return classData;
   }
 
   // Create session
-  static async createSession(classId: string, partnerId: string, data: CreateSessionDto) {
+  static async createSession(
+    classId: string,
+    partnerId: string,
+    data: CreateSessionDto
+  ) {
     // Verify ownership
     const classData = await prisma.class.findFirst({
       where: {
@@ -93,11 +101,11 @@ export class ClassService {
     });
 
     if (!classData) {
-      throw new AppError(404, 'Class not found or access denied');
+      throw new AppError(404, "Class not found or access denied");
     }
 
-    if (classData.status !== 'PUBLISHED') {
-      throw new AppError(400, 'Class must be published to create sessions');
+    if (classData.status !== "PUBLISHED") {
+      throw new AppError(400, "Class must be published to create sessions");
     }
 
     const startTime = new Date(data.startTime);
@@ -109,7 +117,7 @@ export class ClassService {
         class: {
           studioId: classData.studioId,
         },
-        status: 'SCHEDULED',
+        status: "SCHEDULED",
         OR: [
           {
             startTime: { lte: startTime },
@@ -124,7 +132,7 @@ export class ClassService {
     });
 
     if (conflict) {
-      throw new AppError(400, 'Session conflicts with existing session');
+      throw new AppError(400, "Session conflicts with existing session");
     }
 
     const session = await prisma.session.create({
@@ -133,7 +141,7 @@ export class ClassService {
         startTime,
         endTime,
         instructorName: data.instructorName,
-        status: 'SCHEDULED',
+        status: "SCHEDULED",
       },
     });
 
@@ -141,7 +149,11 @@ export class ClassService {
   }
 
   // Update class
-  static async updateClass(classId: string, partnerId: string, data: Partial<CreateClassDto>) {
+  static async updateClass(
+    classId: string,
+    partnerId: string,
+    data: Partial<CreateClassDto>
+  ) {
     // Verify ownership
     const classData = await prisma.class.findFirst({
       where: {
@@ -151,21 +163,25 @@ export class ClassService {
     });
 
     if (!classData) {
-      throw new AppError(404, 'Class not found or access denied');
+      throw new AppError(404, "Class not found or access denied");
     }
+
+    const updateData: any = {};
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.description !== undefined)
+      updateData.description = data.description;
+    if (data.type !== undefined) updateData.type = data.type;
+    if (data.durationMinutes !== undefined)
+      updateData.durationMinutes = data.durationMinutes;
+    if (data.maxCapacity !== undefined)
+      updateData.maxCapacity = data.maxCapacity;
+    if (data.basePrice !== undefined) updateData.basePrice = data.basePrice;
+    if (data.photos !== undefined) updateData.photos = data.photos;
+    if (data.amenities !== undefined) updateData.amenities = data.amenities;
 
     const updated = await prisma.class.update({
       where: { id: classId },
-      data: {
-        title: data.title,
-        description: data.description,
-        type: data.type,
-        durationMinutes: data.durationMinutes,
-        maxCapacity: data.maxCapacity,
-        basePrice: data.basePrice,
-        photos: data.photos,
-        amenities: data.amenities,
-      },
+      data: updateData,
     });
 
     return updated;
@@ -181,7 +197,7 @@ export class ClassService {
     });
 
     if (!classData) {
-      throw new AppError(404, 'Class not found or access denied');
+      throw new AppError(404, "Class not found or access denied");
     }
 
     // Check for upcoming sessions
@@ -189,25 +205,29 @@ export class ClassService {
       where: {
         classId,
         startTime: { gte: new Date() },
-        status: 'SCHEDULED',
+        status: "SCHEDULED",
       },
     });
 
     if (upcomingSessions > 0) {
-      throw new AppError(400, 'Cannot delete class with upcoming sessions');
+      throw new AppError(400, "Cannot delete class with upcoming sessions");
     }
 
     // Archive instead of delete
     await prisma.class.update({
       where: { id: classId },
-      data: { status: 'ARCHIVED' },
+      data: { status: "ARCHIVED" },
     });
 
-    return { message: 'Class archived successfully' };
+    return { message: "Class archived successfully" };
   }
 
   // Update class status
-  static async updateClassStatus(classId: string, partnerId: string, status: string) {
+  static async updateClassStatus(
+    classId: string,
+    partnerId: string,
+    status: string
+  ) {
     const classData = await prisma.class.findFirst({
       where: {
         id: classId,
@@ -216,13 +236,13 @@ export class ClassService {
     });
 
     if (!classData) {
-      throw new AppError(404, 'Class not found or access denied');
+      throw new AppError(404, "Class not found or access denied");
     }
 
     const updated = await prisma.class.update({
       where: { id: classId },
-      data: { 
-        status: status as 'DRAFT' | 'PENDING_REVIEW' | 'PUBLISHED' | 'ARCHIVED' 
+      data: {
+        status: status as "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "ARCHIVED",
       },
     });
 
@@ -230,13 +250,16 @@ export class ClassService {
   }
 
   // Get sessions for a class
-  static async getClassSessions(classId: string, options?: {
-    page?: number;
-    limit?: number;
-    status?: string;
-    fromDate?: Date;
-    toDate?: Date;
-  }) {
+  static async getClassSessions(
+    classId: string,
+    options?: {
+      page?: number;
+      limit?: number;
+      status?: string;
+      fromDate?: Date;
+      toDate?: Date;
+    }
+  ) {
     const page = options?.page ?? 1;
     const limit = options?.limit ?? 20;
     const skip = (page - 1) * limit;
@@ -244,12 +267,13 @@ export class ClassService {
     const where: Record<string, any> = {
       classId,
       ...(options?.status && { status: options.status }),
-      ...(options?.fromDate && options?.toDate && {
-        startTime: {
-          gte: options.fromDate,
-          lte: options.toDate,
-        },
-      }),
+      ...(options?.fromDate &&
+        options?.toDate && {
+          startTime: {
+            gte: options.fromDate,
+            lte: options.toDate,
+          },
+        }),
     };
 
     const [sessions, total] = await Promise.all([
@@ -260,13 +284,13 @@ export class ClassService {
             select: {
               bookings: {
                 where: {
-                  status: { in: ['CONFIRMED', 'COMPLETED'] },
+                  status: { in: ["CONFIRMED", "COMPLETED"] },
                 },
               },
             },
           },
         },
-        orderBy: { startTime: 'asc' },
+        orderBy: { startTime: "asc" },
         skip,
         take: limit,
       }),
@@ -295,17 +319,17 @@ export class ClassService {
       },
       include: {
         bookings: {
-          where: { status: 'CONFIRMED' },
+          where: { status: "CONFIRMED" },
         },
       },
     });
 
     if (!session) {
-      throw new AppError(404, 'Session not found or access denied');
+      throw new AppError(404, "Session not found or access denied");
     }
 
-    if (session.status !== 'SCHEDULED') {
-      throw new AppError(400, 'Only scheduled sessions can be cancelled');
+    if (session.status !== "SCHEDULED") {
+      throw new AppError(400, "Only scheduled sessions can be cancelled");
     }
 
     // Cancel all bookings and notify users
@@ -315,17 +339,17 @@ export class ClassService {
         prisma.booking.updateMany({
           where: {
             sessionId,
-            status: 'CONFIRMED',
+            status: "CONFIRMED",
           },
-          data: { status: 'CANCELLED' },
+          data: { status: "CANCELLED" },
         }),
         // Create notifications
         prisma.notification.createMany({
-          data: session.bookings.map(booking => ({
+          data: session.bookings.map((booking) => ({
             userId: booking.userId,
-            type: 'SESSION_CANCELLED',
-            title: 'Session Cancelled',
-            body: 'Your booked session has been cancelled. You will receive a full refund.',
+            type: "SESSION_CANCELLED",
+            title: "Session Cancelled",
+            body: "Your booked session has been cancelled. You will receive a full refund.",
           })),
         }),
       ]);
@@ -334,7 +358,7 @@ export class ClassService {
     // Update session status
     const updated = await prisma.session.update({
       where: { id: sessionId },
-      data: { status: 'CANCELLED' },
+      data: { status: "CANCELLED" },
     });
 
     return updated;
@@ -350,7 +374,7 @@ export class ClassService {
     });
 
     if (!original) {
-      throw new AppError(404, 'Class not found or access denied');
+      throw new AppError(404, "Class not found or access denied");
     }
 
     const duplicate = await prisma.class.create({
@@ -364,7 +388,7 @@ export class ClassService {
         basePrice: original.basePrice,
         photos: original.photos as string[],
         amenities: original.amenities as string[],
-        status: 'DRAFT',
+        status: "DRAFT",
       },
     });
 
@@ -383,13 +407,13 @@ export class ClassService {
     });
 
     if (!session) {
-      throw new AppError(404, 'Session not found or access denied');
+      throw new AppError(404, "Session not found or access denied");
     }
 
     const bookings = await prisma.booking.findMany({
       where: {
         sessionId,
-        status: { in: ['CONFIRMED', 'COMPLETED'] },
+        status: { in: ["CONFIRMED", "COMPLETED"] },
       },
       include: {
         user: {
@@ -398,7 +422,7 @@ export class ClassService {
           },
         },
       },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: "asc" },
     });
 
     return bookings;

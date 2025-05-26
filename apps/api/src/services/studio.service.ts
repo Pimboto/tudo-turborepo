@@ -1,7 +1,7 @@
 // src/services/studio.service.ts - CORREGIDO
-import { prisma } from '../prisma/client';
-import { AppError } from '../middleware/errorHandler';
-import { CreateStudioDto, UpdateStudioDto, SearchFilters } from '../types';
+import { prisma } from "../prisma/client";
+import { AppError } from "../middleware/errorHandler";
+import { CreateStudioDto, UpdateStudioDto, SearchFilters } from "../types";
 
 export class StudioService {
   // Create studio
@@ -37,7 +37,7 @@ export class StudioService {
           },
         },
         classes: {
-          where: { status: 'PUBLISHED' },
+          where: { status: "PUBLISHED" },
           include: {
             _count: {
               select: {
@@ -55,35 +55,41 @@ export class StudioService {
     });
 
     if (!studio) {
-      throw new AppError(404, 'Studio not found');
+      throw new AppError(404, "Studio not found");
     }
 
     return studio;
   }
 
   // Update studio
-  static async updateStudio(studioId: string, partnerId: string, data: UpdateStudioDto) {
+  static async updateStudio(
+    studioId: string,
+    partnerId: string,
+    data: UpdateStudioDto
+  ) {
     // Verify ownership
     const studio = await prisma.studio.findFirst({
       where: { id: studioId, partnerId },
     });
 
     if (!studio) {
-      throw new AppError(404, 'Studio not found or access denied');
+      throw new AppError(404, "Studio not found or access denied");
     }
+
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.description !== undefined)
+      updateData.description = data.description;
+    if (data.address !== undefined) updateData.address = data.address;
+    if (data.lat !== undefined) updateData.lat = data.lat;
+    if (data.lng !== undefined) updateData.lng = data.lng;
+    if (data.amenities !== undefined) updateData.amenities = data.amenities;
+    if (data.photos !== undefined) updateData.photos = data.photos;
+    if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
     const updated = await prisma.studio.update({
       where: { id: studioId },
-      data: {
-        name: data.name,
-        description: data.description,
-        address: data.address,
-        lat: data.lat,
-        lng: data.lng,
-        amenities: data.amenities,
-        photos: data.photos,
-        isActive: data.isActive,
-      },
+      data: updateData,
     });
 
     return updated;
@@ -96,7 +102,7 @@ export class StudioService {
     });
 
     if (!studio) {
-      throw new AppError(404, 'Studio not found or access denied');
+      throw new AppError(404, "Studio not found or access denied");
     }
 
     await prisma.studio.update({
@@ -104,12 +110,12 @@ export class StudioService {
       data: { isActive: false },
     });
 
-    return { message: 'Studio deleted successfully' };
+    return { message: "Studio deleted successfully" };
   }
 
   // Search studios
   static async searchStudios(
-    filters: SearchFilters, 
+    filters: SearchFilters,
     pagination: { page: number; limit: number }
   ) {
     const { page, limit } = pagination;
@@ -124,7 +130,8 @@ export class StudioService {
       // For simplicity, we'll use a basic bounding box
       // In production, you'd want to use PostGIS or similar
       const latDiff = filters.radius / 111; // 1 degree ≈ 111 km
-      const lngDiff = filters.radius / (111 * Math.cos(filters.lat * Math.PI / 180));
+      const lngDiff =
+        filters.radius / (111 * Math.cos((filters.lat * Math.PI) / 180));
 
       where.lat = {
         gte: filters.lat - latDiff,
@@ -155,7 +162,7 @@ export class StudioService {
           },
           classes: {
             where: {
-              status: 'PUBLISHED',
+              status: "PUBLISHED",
               ...(filters.type && { type: filters.type }),
               ...(filters.minPrice !== undefined && {
                 basePrice: { gte: filters.minPrice },
@@ -167,13 +174,13 @@ export class StudioService {
             include: {
               sessions: {
                 where: {
-                  status: 'SCHEDULED',
+                  status: "SCHEDULED",
                   startTime: {
                     gte: filters.startDate || new Date(),
                     ...(filters.endDate && { lte: filters.endDate }),
                   },
                 },
-                orderBy: { startTime: 'asc' },
+                orderBy: { startTime: "asc" },
                 take: 5,
               },
             },
@@ -184,10 +191,7 @@ export class StudioService {
             },
           },
         },
-        orderBy: [
-          { rating: 'desc' },
-          { createdAt: 'desc' },
-        ],
+        orderBy: [{ rating: "desc" }, { createdAt: "desc" }],
         skip,
         take: limit,
       }),
@@ -210,7 +214,7 @@ export class StudioService {
 
     // Sort by distance if available
     if (filters.lat && filters.lng) {
-      studiosWithDistance.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+      studiosWithDistance.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
     }
 
     return {
@@ -225,12 +229,15 @@ export class StudioService {
   }
 
   // Get studio classes
-  static async getStudioClasses(studioId: string, options?: {
-    page?: number;
-    limit?: number;
-    status?: string;
-    type?: string;
-  }) {
+  static async getStudioClasses(
+    studioId: string,
+    options?: {
+      page?: number;
+      limit?: number;
+      status?: string;
+      type?: string;
+    }
+  ) {
     const page = options?.page ?? 1;
     const limit = options?.limit ?? 20;
     const skip = (page - 1) * limit;
@@ -247,10 +254,10 @@ export class StudioService {
         include: {
           sessions: {
             where: {
-              status: 'SCHEDULED',
+              status: "SCHEDULED",
               startTime: { gte: new Date() },
             },
-            orderBy: { startTime: 'asc' },
+            orderBy: { startTime: "asc" },
             take: 3,
           },
           _count: {
@@ -259,7 +266,7 @@ export class StudioService {
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip,
         take: limit,
       }),
@@ -278,7 +285,11 @@ export class StudioService {
   }
 
   // Get studio schedule
-  static async getStudioSchedule(studioId: string, startDate: Date, endDate: Date) {
+  static async getStudioSchedule(
+    studioId: string,
+    startDate: Date,
+    endDate: Date
+  ) {
     const sessions = await prisma.session.findMany({
       where: {
         class: {
@@ -295,19 +306,19 @@ export class StudioService {
           select: {
             bookings: {
               where: {
-                status: { in: ['CONFIRMED', 'COMPLETED'] },
+                status: { in: ["CONFIRMED", "COMPLETED"] },
               },
             },
           },
         },
       },
-      orderBy: { startTime: 'asc' },
+      orderBy: { startTime: "asc" },
     });
 
     // Group by date
     const schedule: Record<string, typeof sessions> = {};
-    sessions.forEach(session => {
-      const date = session.startTime.toISOString().split('T')[0];
+    sessions.forEach((session) => {
+      const date = session.startTime.toISOString().split("T")[0];
       if (!schedule[date]) {
         schedule[date] = [];
       }
@@ -318,10 +329,13 @@ export class StudioService {
   }
 
   // Get studio reviews (for future implementation)
-  static async getStudioReviews(studioId: string, options?: {
-    page?: number;
-    limit?: number;
-  }) {
+  static async getStudioReviews(
+    studioId: string,
+    options?: {
+      page?: number;
+      limit?: number;
+    }
+  ) {
     // Placeholder for when reviews are implemented
     return {
       reviews: [],
@@ -336,13 +350,21 @@ export class StudioService {
 }
 
 // Helper function to calculate distance between two points
-function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+function calculateDistance(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number
+): number {
   const R = 6371; // Earth's radius in kilometers
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }

@@ -1,7 +1,7 @@
 // src/services/partner.service.ts
-import { prisma } from '../prisma/client';
-import { AppError } from '../middleware/errorHandler';
-import { CreatePartnerDto } from '../types';
+import { prisma } from "../prisma/client";
+import { AppError } from "../middleware/errorHandler";
+import { CreatePartnerDto } from "../types";
 
 export class PartnerService {
   // Create partner account
@@ -12,20 +12,20 @@ export class PartnerService {
     });
 
     if (existingPartner) {
-      throw new AppError(409, 'Partner account already exists');
+      throw new AppError(409, "Partner account already exists");
     }
 
     // Update user role to PARTNER and create partner record
     const [user, partner] = await prisma.$transaction([
       prisma.user.update({
         where: { id: userId },
-        data: { role: 'PARTNER' },
+        data: { role: "PARTNER" },
       }),
       prisma.partner.create({
         data: {
           userId,
           companyName: data.companyName,
-          taxInfo: data.taxInfo,
+          ...(data.taxInfo && { taxInfo: data.taxInfo }),
         },
       }),
     ]);
@@ -33,9 +33,9 @@ export class PartnerService {
     // Create notification for admin
     await prisma.notification.create({
       data: {
-        userId: 'admin', // We'll need to get actual admin IDs
-        type: 'NEW_PARTNER_REQUEST',
-        title: 'New Partner Request',
+        userId: "admin", // We'll need to get actual admin IDs
+        type: "NEW_PARTNER_REQUEST",
+        title: "New Partner Request",
         body: `${data.companyName} has requested partner verification`,
       },
     });
@@ -66,28 +66,38 @@ export class PartnerService {
     });
 
     if (!partner) {
-      throw new AppError(404, 'Partner not found');
+      throw new AppError(404, "Partner not found");
     }
 
     return partner;
   }
 
   // Update partner info
-  static async updatePartner(partnerId: string, data: Partial<CreatePartnerDto>) {
+  static async updatePartner(
+    partnerId: string,
+    data: Partial<CreatePartnerDto>
+  ) {
+    const updateData: any = {};
+    if (data.companyName !== undefined)
+      updateData.companyName = data.companyName;
+    if (data.taxInfo !== undefined) updateData.taxInfo = data.taxInfo;
+
     const partner = await prisma.partner.update({
       where: { id: partnerId },
-      data: {
-        companyName: data.companyName,
-        taxInfo: data.taxInfo,
-      },
+      data: updateData,
     });
 
     return partner;
   }
 
   // Get partner analytics
-  static async getPartnerAnalytics(partnerId: string, dateRange?: { start: Date; end: Date }) {
-    const start = dateRange?.start || new Date(new Date().setDate(new Date().getDate() - 30));
+  static async getPartnerAnalytics(
+    partnerId: string,
+    dateRange?: { start: Date; end: Date }
+  ) {
+    const start =
+      dateRange?.start ||
+      new Date(new Date().setDate(new Date().getDate() - 30));
     const end = dateRange?.end || new Date();
 
     // Get all studios for this partner
@@ -96,11 +106,11 @@ export class PartnerService {
       select: { id: true },
     });
 
-    const studioIds = studios.map(s => s.id);
+    const studioIds = studios.map((s) => s.id);
 
     // Get booking stats
     const bookingStats = await prisma.booking.groupBy({
-      by: ['status'],
+      by: ["status"],
       where: {
         session: {
           class: {
@@ -115,7 +125,7 @@ export class PartnerService {
     // Get revenue
     const revenue = await prisma.booking.aggregate({
       where: {
-        status: 'COMPLETED',
+        status: "COMPLETED",
         session: {
           class: {
             studioId: { in: studioIds },
@@ -130,7 +140,7 @@ export class PartnerService {
 
     // Get popular classes
     const popularClasses = await prisma.booking.groupBy({
-      by: ['sessionId'],
+      by: ["sessionId"],
       where: {
         session: {
           class: {
@@ -142,7 +152,7 @@ export class PartnerService {
       _count: true,
       orderBy: {
         _count: {
-          sessionId: 'desc',
+          sessionId: "desc",
         },
       },
       take: 5,
@@ -167,8 +177,10 @@ export class PartnerService {
     return {
       summary: {
         totalBookings: bookingStats.reduce((acc, stat) => acc + stat._count, 0),
-        completedBookings: bookingStats.find(s => s.status === 'COMPLETED')?._count ?? 0,
-        cancelledBookings: bookingStats.find(s => s.status === 'CANCELLED')?._count ?? 0,
+        completedBookings:
+          bookingStats.find((s) => s.status === "COMPLETED")?._count ?? 0,
+        cancelledBookings:
+          bookingStats.find((s) => s.status === "CANCELLED")?._count ?? 0,
         totalRevenue: revenue._sum.amountPaid ?? 0,
         totalStudios: studios.length,
       },
@@ -179,11 +191,14 @@ export class PartnerService {
   }
 
   // Get partner studios
-  static async getPartnerStudios(partnerId: string, options?: {
-    page?: number;
-    limit?: number;
-    isActive?: boolean;
-  }) {
+  static async getPartnerStudios(
+    partnerId: string,
+    options?: {
+      page?: number;
+      limit?: number;
+      isActive?: boolean;
+    }
+  ) {
     const page = options?.page ?? 1;
     const limit = options?.limit ?? 20;
     const skip = (page - 1) * limit;
@@ -203,7 +218,7 @@ export class PartnerService {
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip,
         take: limit,
       }),
@@ -235,29 +250,29 @@ export class PartnerService {
     });
 
     if (!partner) {
-      throw new AppError(404, 'Partner not found');
+      throw new AppError(404, "Partner not found");
     }
 
     if (partner.isVerified) {
-      throw new AppError(400, 'Partner already verified');
+      throw new AppError(400, "Partner already verified");
     }
 
     // Get admin users
     const admins = await prisma.user.findMany({
-      where: { role: 'ADMIN' },
+      where: { role: "ADMIN" },
       select: { id: true },
     });
 
     // Create notifications for all admins
     await prisma.notification.createMany({
-      data: admins.map(admin => ({
+      data: admins.map((admin) => ({
         userId: admin.id,
-        type: 'PARTNER_VERIFICATION_REQUEST',
-        title: 'Partner Verification Request',
+        type: "PARTNER_VERIFICATION_REQUEST",
+        title: "Partner Verification Request",
         body: `${partner.companyName} has requested verification`,
       })),
     });
 
-    return { message: 'Verification request sent successfully' };
+    return { message: "Verification request sent successfully" };
   }
 }

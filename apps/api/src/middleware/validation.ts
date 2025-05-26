@@ -1,10 +1,13 @@
-
 // src/middleware/validation.ts
-import { Request, Response, NextFunction } from 'express';
-import { AnyZodObject, ZodError, z } from 'zod';
+import { Request, Response, NextFunction } from "express";
+import { AnyZodObject, ZodError, z } from "zod";
 
 export const validate = (schema: AnyZodObject) => {
-  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  return async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       await schema.parseAsync({
         body: req.body,
@@ -16,7 +19,7 @@ export const validate = (schema: AnyZodObject) => {
       if (error instanceof ZodError) {
         res.status(400).json({
           success: false,
-          error: 'Validation error',
+          error: "Validation error",
           details: error.errors,
         });
         return;
@@ -26,14 +29,13 @@ export const validate = (schema: AnyZodObject) => {
   };
 };
 
-
 export const schemas = {
   // User schemas
   createUser: z.object({
     body: z.object({
       email: z.string().email(),
       clerkId: z.string(),
-      role: z.enum(['CLIENT', 'PARTNER', 'ADMIN']).optional(),
+      role: z.enum(["CLIENT", "PARTNER", "ADMIN"]).optional(),
       referralCode: z.string().optional(),
     }),
   }),
@@ -44,11 +46,13 @@ export const schemas = {
       phone: z.string().optional(),
       avatarUrl: z.string().url().optional(),
       address: z.string().optional(),
-      preferences: z.object({
-        amenities: z.array(z.string()).optional(),
-        classTypes: z.array(z.string()).optional(),
-        zones: z.array(z.string()).optional(),
-      }).optional(),
+      preferences: z
+        .object({
+          amenities: z.array(z.string()).optional(),
+          classTypes: z.array(z.string()).optional(),
+          zones: z.array(z.string()).optional(),
+        })
+        .optional(),
     }),
   }),
 
@@ -178,7 +182,7 @@ export const schemas = {
       id: z.string(),
     }),
     body: z.object({
-      status: z.enum(['DRAFT', 'PENDING_REVIEW', 'PUBLISHED', 'ARCHIVED']),
+      status: z.enum(["DRAFT", "PENDING_REVIEW", "PUBLISHED", "ARCHIVED"]),
     }),
   }),
 
@@ -361,6 +365,22 @@ export const schemas = {
   idParam: z.object({
     params: z.object({
       id: z.string(),
+    }),
+  }),
+
+  searchStudios: z.object({
+    query: z.object({
+      page: z.string().transform(Number).optional(),
+      limit: z.string().transform(Number).optional(),
+      lat: z.string().transform(Number).optional(),
+      lng: z.string().transform(Number).optional(),
+      radius: z.string().transform(Number).optional(),
+      type: z.string().optional(),
+      amenities: z.string().optional(),
+      minPrice: z.string().transform(Number).optional(),
+      maxPrice: z.string().transform(Number).optional(),
+      startDate: z.string().datetime().optional(),
+      endDate: z.string().datetime().optional(),
     }),
   }),
 };

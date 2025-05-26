@@ -1,7 +1,7 @@
 // src/services/user.service.ts
-import { prisma } from '../prisma/client';
-import { AppError } from '../middleware/errorHandler';
-import { UpdateProfileDto } from '../types';
+import { prisma } from "../prisma/client";
+import { AppError } from "../middleware/errorHandler";
+import { UpdateProfileDto } from "../types";
 
 export class UserService {
   // Get user by ID
@@ -15,7 +15,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new AppError(404, 'User not found');
+      throw new AppError(404, "User not found");
     }
 
     return user;
@@ -32,7 +32,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new AppError(404, 'User not found');
+      throw new AppError(404, "User not found");
     }
 
     return user;
@@ -40,34 +40,39 @@ export class UserService {
 
   // Update user profile
   static async updateProfile(userId: string, data: UpdateProfileDto) {
+    const updateData: any = {};
+    if (data.fullName !== undefined) updateData.fullName = data.fullName;
+    if (data.phone !== undefined) updateData.phone = data.phone;
+    if (data.avatarUrl !== undefined) updateData.avatarUrl = data.avatarUrl;
+    if (data.address !== undefined) updateData.address = data.address;
+    if (data.preferences !== undefined)
+      updateData.preferences = data.preferences;
+
     const profile = await prisma.profile.update({
       where: { userId },
-      data: {
-        fullName: data.fullName,
-        phone: data.phone,
-        avatarUrl: data.avatarUrl,
-        address: data.address,
-        preferences: data.preferences || undefined,
-      },
+      data: updateData,
     });
 
     return profile;
   }
 
   // Get user's bookings
-  static async getUserBookings(userId: string, options?: {
-    status?: string;
-    page?: number;
-    limit?: number;
-  }) {
+  static async getUserBookings(
+    userId: string,
+    options?: {
+      status?: string;
+      page?: number;
+      limit?: number;
+    }
+  ) {
     const page = options?.page ?? 1;
     const limit = options?.limit ?? 20;
     const skip = (page - 1) * limit;
 
-    const where = {
-      userId,
-      ...(options?.status && { status: options.status }),
-    };
+    const where: any = { userId };
+    if (options?.status) {
+      where.status = options.status;
+    }
 
     const [bookings, total] = await Promise.all([
       prisma.booking.findMany({
@@ -83,7 +88,7 @@ export class UserService {
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip,
         take: limit,
       }),
@@ -102,11 +107,14 @@ export class UserService {
   }
 
   // Get user's notifications
-  static async getUserNotifications(userId: string, options?: {
-    unreadOnly?: boolean;
-    page?: number;
-    limit?: number;
-  }) {
+  static async getUserNotifications(
+    userId: string,
+    options?: {
+      unreadOnly?: boolean;
+      page?: number;
+      limit?: number;
+    }
+  ) {
     const page = options?.page ?? 1;
     const limit = options?.limit ?? 20;
     const skip = (page - 1) * limit;
@@ -119,7 +127,7 @@ export class UserService {
     const [notifications, total] = await Promise.all([
       prisma.notification.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip,
         take: limit,
       }),
@@ -150,7 +158,7 @@ export class UserService {
     });
 
     if (notification.count === 0) {
-      throw new AppError(404, 'Notification not found');
+      throw new AppError(404, "Notification not found");
     }
 
     return notification;
@@ -181,7 +189,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new AppError(404, 'User not found');
+      throw new AppError(404, "User not found");
     }
 
     return {

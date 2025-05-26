@@ -1,63 +1,63 @@
 // src/controllers/partner.controller.ts
-import { Response } from 'express';
-import { AuthenticatedRequest } from '../types';
-import { PartnerService } from '../services/partner.service';
-import { successResponse, getPagination } from '../utils/helpers';
-import { AppError } from '../middleware/errorHandler';
-import { prisma } from '../prisma/client';
+import { Response } from "express";
+import { AuthenticatedRequest } from "../types";
+import { PartnerService } from "../services/partner.service";
+import { successResponse, getPagination } from "../utils/helpers";
+import { AppError } from "../middleware/errorHandler";
+import { prisma } from "../prisma/client";
 
 export class PartnerController {
   // Register as partner
   static async register(req: AuthenticatedRequest, res: Response) {
     const userId = req.user!.id;
-    
+
     // Check if user is already a partner
-    if (req.user!.role === 'PARTNER') {
-      throw new AppError(400, 'User is already a partner');
+    if (req.user!.role === "PARTNER") {
+      throw new AppError(400, "User is already a partner");
     }
 
     const partner = await PartnerService.createPartner(userId, req.body);
-    
-    res.status(201).json(
-      successResponse(partner, 'Partner account created successfully')
-    );
+
+    res
+      .status(201)
+      .json(successResponse(partner, "Partner account created successfully"));
   }
 
   // Get partner profile
   static async getProfile(req: AuthenticatedRequest, res: Response) {
     const userId = req.user!.id;
     const partner = await PartnerService.getPartnerByUserId(userId);
-    
+
     res.json(successResponse(partner));
   }
 
   // Update partner profile
   static async updateProfile(req: AuthenticatedRequest, res: Response) {
     const userId = req.user!.id;
-    
+
     const partner = await prisma.partner.findUnique({
       where: { userId },
     });
 
     if (!partner) {
-      throw new AppError(404, 'Partner not found');
+      throw new AppError(404, "Partner not found");
     }
 
     const updated = await PartnerService.updatePartner(partner.id, req.body);
-    
-    res.json(successResponse(updated, 'Partner profile updated successfully'));
+
+    res.json(successResponse(updated, "Partner profile updated successfully"));
   }
 
   // Get partner dashboard data
   static async getDashboard(req: AuthenticatedRequest, res: Response) {
     const userId = req.user!.id;
-    
+
     const partner = await prisma.partner.findUnique({
       where: { userId },
     });
 
     if (!partner) {
-      throw new AppError(404, 'Partner not found');
+      throw new AppError(404, "Partner not found");
     }
 
     const [
@@ -98,7 +98,7 @@ export class PartnerController {
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         take: 10,
       }),
       // Upcoming sessions
@@ -112,7 +112,7 @@ export class PartnerController {
           startTime: {
             gte: new Date(),
           },
-          status: 'SCHEDULED',
+          status: "SCHEDULED",
         },
         include: {
           class: {
@@ -126,7 +126,7 @@ export class PartnerController {
             },
           },
         },
-        orderBy: { startTime: 'asc' },
+        orderBy: { startTime: "asc" },
         take: 5,
       }),
       // Total studios
@@ -143,38 +143,41 @@ export class PartnerController {
       }),
     ]);
 
-    res.json(successResponse({
-      partner,
-      analytics,
-      recentBookings,
-      upcomingSessions,
-      stats: {
-        totalStudios,
-        totalClasses,
-      },
-    }));
+    res.json(
+      successResponse({
+        partner,
+        analytics,
+        recentBookings,
+        upcomingSessions,
+        stats: {
+          totalStudios,
+          totalClasses,
+        },
+      })
+    );
   }
 
   // Get partner analytics
   static async getAnalytics(req: AuthenticatedRequest, res: Response) {
     const userId = req.user!.id;
     const { startDate, endDate } = req.query;
-    
+
     const partner = await prisma.partner.findUnique({
       where: { userId },
     });
 
     if (!partner) {
-      throw new AppError(404, 'Partner not found');
+      throw new AppError(404, "Partner not found");
     }
 
-    const dateRange = {
-      start: startDate ? new Date(startDate as string) : undefined,
-      end: endDate ? new Date(endDate as string) : undefined,
-    };
+    const analytics =
+      startDate && endDate
+        ? await PartnerService.getPartnerAnalytics(partner.id, {
+            start: new Date(startDate as string),
+            end: new Date(endDate as string),
+          })
+        : await PartnerService.getPartnerAnalytics(partner.id);
 
-    const analytics = await PartnerService.getPartnerAnalytics(partner.id, dateRange);
-    
     res.json(successResponse(analytics));
   }
 
@@ -182,40 +185,40 @@ export class PartnerController {
   static async getStudios(req: AuthenticatedRequest, res: Response) {
     const userId = req.user!.id;
     const { page, limit } = getPagination(req.query);
-    const isActive = req.query.isActive === 'true' ? true : 
-                     req.query.isActive === 'false' ? false : undefined;
-    
+    const options: { page: number; limit: number; isActive?: boolean } = {
+      page,
+      limit,
+    };
+    if (req.query.isActive === "true") options.isActive = true;
+    if (req.query.isActive === "false") options.isActive = false;
+
     const partner = await prisma.partner.findUnique({
       where: { userId },
     });
 
     if (!partner) {
-      throw new AppError(404, 'Partner not found');
+      throw new AppError(404, "Partner not found");
     }
 
-    const result = await PartnerService.getPartnerStudios(partner.id, {
-      page,
-      limit,
-      isActive,
-    });
-    
+    const result = await PartnerService.getPartnerStudios(partner.id, options);
+
     res.json(successResponse(result.studios, undefined, result.pagination));
   }
 
   // Request verification
   static async requestVerification(req: AuthenticatedRequest, res: Response) {
     const userId = req.user!.id;
-    
+
     const partner = await prisma.partner.findUnique({
       where: { userId },
     });
 
     if (!partner) {
-      throw new AppError(404, 'Partner not found');
+      throw new AppError(404, "Partner not found");
     }
 
     const result = await PartnerService.requestVerification(partner.id);
-    
+
     res.json(successResponse(result));
   }
 
@@ -224,13 +227,13 @@ export class PartnerController {
     const userId = req.user!.id;
     const { page, limit } = getPagination(req.query);
     const { startDate, endDate } = req.query;
-    
+
     const partner = await prisma.partner.findUnique({
       where: { userId },
     });
 
     if (!partner) {
-      throw new AppError(404, 'Partner not found');
+      throw new AppError(404, "Partner not found");
     }
 
     const studios = await prisma.studio.findMany({
@@ -238,20 +241,20 @@ export class PartnerController {
       select: { id: true },
     });
 
-    const studioIds = studios.map(s => s.id);
+    const studioIds = studios.map((s) => s.id);
 
-    const where = {
-      status: 'COMPLETED',
+    const where: any = {
       session: {
         class: {
           studioId: { in: studioIds },
         },
-        ...(startDate && endDate && {
-          startTime: {
-            gte: new Date(startDate as string),
-            lte: new Date(endDate as string),
-          },
-        }),
+        ...(startDate &&
+          endDate && {
+            startTime: {
+              gte: new Date(startDate as string),
+              lte: new Date(endDate as string),
+            },
+          }),
       },
     };
 
@@ -278,7 +281,7 @@ export class PartnerController {
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -286,7 +289,7 @@ export class PartnerController {
     ]);
 
     // Calculate earnings with commission
-    const earningsWithCommission = earnings.map(booking => ({
+    const earningsWithCommission = earnings.map((booking) => ({
       ...booking,
       commission: booking.amountPaid * partner.commissionRate,
       netEarning: booking.amountPaid * (1 - partner.commissionRate),
@@ -299,20 +302,28 @@ export class PartnerController {
       },
     });
 
-    res.json(successResponse({
-      earnings: earningsWithCommission,
-      summary: {
-        totalRevenue: totalAmount._sum.amountPaid ?? 0,
-        totalCommission: (totalAmount._sum.amountPaid ?? 0) * partner.commissionRate,
-        netEarnings: (totalAmount._sum.amountPaid ?? 0) * (1 - partner.commissionRate),
-        commissionRate: partner.commissionRate,
-      },
-    }, undefined, {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    }));
+    const totalRevenue = totalAmount._sum?.amountPaid ?? 0;
+
+    res.json(
+      successResponse(
+        {
+          earnings: earningsWithCommission,
+          summary: {
+            totalRevenue,
+            totalCommission: totalRevenue * partner.commissionRate,
+            netEarnings: totalRevenue * (1 - partner.commissionRate),
+            commissionRate: partner.commissionRate,
+          },
+        },
+        undefined,
+        {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        }
+      )
+    );
   }
 
   // Get partner bookings
@@ -320,33 +331,36 @@ export class PartnerController {
     const userId = req.user!.id;
     const { page, limit } = getPagination(req.query);
     const { status, studioId } = req.query;
-    
+
     const partner = await prisma.partner.findUnique({
       where: { userId },
     });
 
     if (!partner) {
-      throw new AppError(404, 'Partner not found');
+      throw new AppError(404, "Partner not found");
     }
 
     const studios = await prisma.studio.findMany({
-      where: { 
+      where: {
         partnerId: partner.id,
         ...(studioId && { id: studioId as string }),
       },
       select: { id: true },
     });
 
-    const studioIds = studios.map(s => s.id);
+    const studioIds = studios.map((s) => s.id);
 
-    const where = {
+    const where: any = {
       session: {
         class: {
           studioId: { in: studioIds },
         },
       },
-      ...(status && { status: status as string }),
     };
+
+    if (status) {
+      where.status = status;
+    }
 
     const [bookings, total] = await Promise.all([
       prisma.booking.findMany({
@@ -367,18 +381,20 @@ export class PartnerController {
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
         take: limit,
       }),
       prisma.booking.count({ where }),
     ]);
 
-    res.json(successResponse(bookings, undefined, {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    }));
+    res.json(
+      successResponse(bookings, undefined, {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      })
+    );
   }
 }

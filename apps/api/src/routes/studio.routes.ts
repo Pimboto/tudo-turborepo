@@ -10,7 +10,7 @@ const router = Router();
 // Public routes
 router.get(
   '/search',
-  validate(schemas.searchClasses),
+  validate(schemas.searchStudios),
   asyncHandler(StudioController.search)
 );
 
