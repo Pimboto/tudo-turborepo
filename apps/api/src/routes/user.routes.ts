@@ -5,7 +5,8 @@ import { UserController } from '../controllers/user.controller';
 import { authenticate, authorize } from '../middleware/auth';
 import { validate, schemas } from '../middleware/validation';
 
-const router = Router();
+const router: Router = Router();
+
 
 // All routes require authentication
 router.use(authenticate);

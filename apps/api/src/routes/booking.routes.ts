@@ -5,7 +5,8 @@ import { BookingController } from '../controllers/booking.controller';
 import { authenticate, authorize } from '../middleware/auth';
 import { validate, schemas } from '../middleware/validation';
 
-const router = Router();
+const router: Router = Router();
+
 
 // Public routes
 router.get(

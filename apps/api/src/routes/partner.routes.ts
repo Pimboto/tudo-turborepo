@@ -5,7 +5,8 @@ import { PartnerController } from '../controllers/partner.controller';
 import { authenticate, authorize } from '../middleware/auth';
 import { validate, schemas } from '../middleware/validation';
 
-const router = Router();
+const router: Router = Router();
+
 
 // Public route - register as partner (requires auth but not partner role)
 router.post(

@@ -5,7 +5,8 @@ import { AdminController } from '../controllers/admin.controller';
 import { authenticate, authorize } from '../middleware/auth';
 import { validate, schemas } from '../middleware/validation';
 
-const router = Router();
+const router: Router = Router();
+
 
 // All admin routes require authentication and admin role
 router.use(authenticate);
