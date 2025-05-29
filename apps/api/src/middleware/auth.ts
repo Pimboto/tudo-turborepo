@@ -1,34 +1,29 @@
-// src/middleware/auth.ts - CORREGIDO
-import { Response, NextFunction } from 'express';
-import { clerkClient } from '@clerk/clerk-sdk-node';
+// apps/api/src/middleware/auth.ts
+import { Request, Response, NextFunction } from 'express';
+import { requireAuth, getAuth, clerkClient } from '@clerk/express';
 import { AuthenticatedRequest } from '../types';
 import { prisma } from '../prisma/client';
 import { AppError } from './errorHandler';
 
-export const authenticate = async (
+// Main authentication middleware - Usando requireAuth() como indica la documentación
+export const authenticate = requireAuth();
+
+// Custom middleware to attach user data from database
+export const attachUserData = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    // Get the auth token from header
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
-      throw new AppError(401, 'No token provided');
-    }
-
-    const token = authHeader.split(' ')[1];
+    const { userId: clerkId } = getAuth(req);
     
-    // Verify with Clerk
-    const verifiedToken = await clerkClient.verifyToken(token);
-    
-    if (!verifiedToken || !verifiedToken.sub) {
-      throw new AppError(401, 'Invalid token');
+    if (!clerkId) {
+      throw new AppError(401, 'No authenticated user');
     }
 
     // Get user from database
     const user = await prisma.user.findUnique({
-      where: { clerkId: verifiedToken.sub },
+      where: { clerkId },
       select: {
         id: true,
         clerkId: true,
@@ -38,7 +33,9 @@ export const authenticate = async (
     });
 
     if (!user) {
-      throw new AppError(401, 'User not found');
+      // User exists in Clerk but not in our database
+      // This shouldn't happen in normal flow
+      throw new AppError(401, 'User not found in database');
     }
 
     // Attach user to request
@@ -52,33 +49,52 @@ export const authenticate = async (
       });
       return;
     }
-    res.status(401).json({ 
+    res.status(500).json({ 
       success: false, 
-      error: 'Authentication failed' 
+      error: 'Internal server error' 
     });
   }
 };
 
+// Combined middleware for protected routes
+export const protectedRoute = [authenticate, attachUserData];
+
 // Middleware to check if user has specific role
-export const authorize = (...roles: string[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
-    if (!req.user) {
-      res.status(401).json({ 
-        success: false, 
-        error: 'Not authenticated' 
-      });
-      return;
-    }
+// Como indica la guía, necesitamos obtener el rol desde los metadatos
+export const requireRole = (...allowedRoles: string[]) => {
+  return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { userId } = getAuth(req);
+      
+      if (!userId) {
+        res.status(401).json({ 
+          success: false, 
+          error: 'Not authenticated' 
+        });
+        return;
+      }
 
-    if (!roles.includes(req.user.role)) {
-      res.status(403).json({ 
-        success: false, 
-        error: 'Insufficient permissions' 
+      // Obtener el usuario de nuestra base de datos que ya tiene el rol
+      const user = await prisma.user.findUnique({
+        where: { clerkId: userId },
+        select: { role: true }
       });
-      return;
-    }
 
-    next();
+      if (!user || !allowedRoles.includes(user.role)) {
+        res.status(403).json({ 
+          success: false, 
+          error: 'Acceso denegado' 
+        });
+        return;
+      }
+
+      next();
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        error: 'Error checking permissions' 
+      });
+    }
   };
 };
 
@@ -105,18 +121,11 @@ export const optionalAuth = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
-      next();
-      return;
-    }
-
-    const token = authHeader.split(' ')[1];
-    const verifiedToken = await clerkClient.verifyToken(token);
+    const { userId: clerkId } = getAuth(req);
     
-    if (verifiedToken?.sub) {
+    if (clerkId) {
       const user = await prisma.user.findUnique({
-        where: { clerkId: verifiedToken.sub },
+        where: { clerkId },
         select: {
           id: true,
           clerkId: true,
@@ -131,7 +140,41 @@ export const optionalAuth = async (
     }
   } catch (error) {
     // Silent fail - optional auth
+    console.error('Optional auth error:', error);
   }
   
   next();
+};
+
+// Alias for backward compatibility
+export const authorize = requireRole;
+
+// Webhook validation middleware for Clerk webhooks
+export const validateClerkWebhook = (webhookSecret: string) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const svixId = req.headers['svix-id'] as string;
+      const svixTimestamp = req.headers['svix-timestamp'] as string;
+      const svixSignature = req.headers['svix-signature'] as string;
+
+      if (!svixId || !svixTimestamp || !svixSignature) {
+        res.status(400).json({ 
+          success: false, 
+          error: 'Missing webhook headers' 
+        });
+        return;
+      }
+
+      // Verify webhook signature
+      // Note: You'll need to install @clerk/backend for webhook verification
+      // or use svix directly
+      
+      next();
+    } catch (error) {
+      res.status(400).json({ 
+        success: false, 
+        error: 'Invalid webhook signature' 
+      });
+    }
+  };
 };

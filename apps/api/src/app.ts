@@ -1,8 +1,9 @@
-// src/app.ts - Updated with security, monitoring, and documentation
+// apps/api/src/app.ts
 import express, { Express } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
+import { clerkMiddleware } from '@clerk/express';
 import { errorHandler } from './middleware/errorHandler';
 import { setupSecurity } from './middleware/security';
 import { requestLogger, errorLogger } from './middleware/logging';
@@ -21,17 +22,27 @@ export const createApp = (): Express => {
     app.use(requestLogger);
   }
 
-  // CORS
+  // CORS - Configure for your domains
   app.use(cors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',
+    origin: [
+      process.env.CLIENT_URL ?? 'http://localhost:3000',
+      process.env.PARTNER_URL ?? 'http://localhost:3001', 
+      process.env.ADMIN_URL ?? 'http://localhost:3002',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Clerk-User-Id'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   }));
   
-  // Request parsing
+  // Request parsing (before Clerk middleware)
   app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+
+  // Clerk middleware - MUST come after body parser
+  app.use(clerkMiddleware({
+    // Optional: Add authorized parties for multi-domain SSO
+    authorizedParties: process.env.CLERK_AUTHORIZED_PARTIES?.split(',') || []
+  }));
 
   // Request timing
   app.use(morgan('combined', {
@@ -57,15 +68,24 @@ export const createApp = (): Express => {
   // Detailed health check
   app.get('/health/detailed', async (req, res) => {
     try {
-      // Add database connectivity check here if needed
+      // Test database connection
+      const { prisma } = await import('./prisma/client');
+      await prisma.$queryRaw`SELECT 1`;
+
+      // Test Clerk connection
+      const { clerkClient } = await import('@clerk/express');
+      const clerkStatus = await clerkClient.users.getCount()
+        .then(() => 'connected')
+        .catch(() => 'error');
+
       res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV ?? 'development',
         version: process.env.npm_package_version || '1.0.0',
         services: {
-          database: 'connected', // You could add actual DB ping here
-          clerk: 'available',
+          database: 'connected',
+          clerk: clerkStatus,
         },
         uptime: process.uptime(),
       });
@@ -74,6 +94,7 @@ export const createApp = (): Express => {
         status: 'error',
         timestamp: new Date().toISOString(),
         error: 'Service unavailable',
+        details: process.env.NODE_ENV === 'development' ? error : undefined,
       });
     }
   });
@@ -83,6 +104,17 @@ export const createApp = (): Express => {
 
   // API routes
   app.use('/api', routes);
+
+  // Clerk webhooks endpoint (if needed)
+  app.post('/api/webhooks/clerk', express.raw({ type: 'application/json' }), async (req, res) => {
+    try {
+      // Handle Clerk webhooks here
+      // You'll need to verify the webhook signature
+      res.json({ received: true });
+    } catch (error) {
+      res.status(400).json({ error: 'Webhook error' });
+    }
+  });
 
   // 404 handler
   app.use((req, res) => {

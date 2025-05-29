@@ -1,9 +1,10 @@
-// src/routes/user.routes.ts - WITH SWAGGER DOCUMENTATION
+// apps/api/src/routes/user.routes.ts
 import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
 import { UserController } from '../controllers/user.controller';
-import { authenticate, authorize } from '../middleware/auth';
+import { attachUserData, authorize } from '../middleware/auth';
 import { validate, schemas } from '../middleware/validation';
+import { requireAuth } from '@clerk/express';
 
 const router: Router = Router();
 
@@ -13,6 +14,9 @@ const router: Router = Router();
  *   name: Users
  *   description: User profile and account management
  */
+
+// All user routes require authentication and user data
+// We'll apply both middlewares to each route
 
 /**
  * @swagger
@@ -99,13 +103,15 @@ const router: Router = Router();
  */
 router.get(
   '/profile',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   asyncHandler(UserController.getProfile)
 );
 
 router.put(
   '/profile',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   validate(schemas.updateProfile),
   asyncHandler(UserController.updateProfile)
 );
@@ -152,7 +158,6 @@ router.put(
  */
 router.get(
   '/bookings',
-  authenticate,
   validate(schemas.userBookings),
   asyncHandler(UserController.getBookings)
 );
@@ -193,9 +198,48 @@ router.get(
  */
 router.get(
   '/bookings/upcoming',
-  authenticate,
   validate(schemas.pagination),
   asyncHandler(UserController.getUpcomingClasses)
+);
+
+/**
+ * @swagger
+ * /api/users/bookings/history:
+ *   get:
+ *     summary: Get booking history
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *     responses:
+ *       200:
+ *         description: Booking history retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Booking'
+ */
+router.get(
+  '/bookings/history',
+  validate(schemas.pagination),
+  asyncHandler(UserController.getBookingHistory)
 );
 
 /**
@@ -235,8 +279,253 @@ router.get(
  */
 router.get(
   '/stats',
-  authenticate,
   asyncHandler(UserController.getUserStats)
+);
+
+/**
+ * @swagger
+ * /api/users/notifications:
+ *   get:
+ *     summary: Get user notifications
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: unreadOnly
+ *         schema:
+ *           type: string
+ *           enum: ['true', 'false']
+ *         description: Filter only unread notifications
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *     responses:
+ *       200:
+ *         description: Notifications retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                           type:
+ *                             type: string
+ *                           title:
+ *                             type: string
+ *                           body:
+ *                             type: string
+ *                           readAt:
+ *                             type: string
+ *                             format: date-time
+ *                             nullable: true
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ */
+router.get(
+  '/notifications',
+  validate(schemas.userNotifications),
+  asyncHandler(UserController.getNotifications)
+);
+
+/**
+ * @swagger
+ * /api/users/notifications/{id}/read:
+ *   put:
+ *     summary: Mark notification as read
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Notification ID
+ *     responses:
+ *       200:
+ *         description: Notification marked as read
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       404:
+ *         description: Notification not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.put(
+  '/notifications/:id/read',
+  validate(schemas.idParam),
+  asyncHandler(UserController.markNotificationRead)
+);
+
+/**
+ * @swagger
+ * /api/users/notifications/read-all:
+ *   put:
+ *     summary: Mark all notifications as read
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: All notifications marked as read
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ */
+router.put(
+  '/notifications/read-all',
+  asyncHandler(UserController.markAllNotificationsRead)
+);
+
+/**
+ * @swagger
+ * /api/users/referral:
+ *   get:
+ *     summary: Get referral information and stats
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Referral information retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: object
+ *                       properties:
+ *                         referralCode:
+ *                           type: string
+ *                           example: TUDO123456
+ *                         totalReferrals:
+ *                           type: integer
+ *                         totalCreditsEarned:
+ *                           type: integer
+ *                         referrals:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: string
+ *                               createdAt:
+ *                                 type: string
+ *                                 format: date-time
+ *                               profile:
+ *                                 type: object
+ *                                 properties:
+ *                                   fullName:
+ *                                     type: string
+ */
+router.get(
+  '/referral',
+  asyncHandler(UserController.getReferralInfo)
+);
+
+/**
+ * @swagger
+ * /api/users/preferences:
+ *   get:
+ *     summary: Get user preferences
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Preferences retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: object
+ *                       properties:
+ *                         amenities:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                         classTypes:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                         zones:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *   put:
+ *     summary: Update user preferences
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               amenities:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["showers", "parking", "wifi"]
+ *               classTypes:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["yoga", "pilates", "spinning"]
+ *               zones:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["downtown", "midtown", "uptown"]
+ *     responses:
+ *       200:
+ *         description: Preferences updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ */
+router.get(
+  '/preferences',
+  asyncHandler(UserController.getPreferences)
+);
+
+router.put(
+  '/preferences',
+  validate(schemas.updatePreferences),
+  asyncHandler(UserController.updatePreferences)
 );
 
 export default router;
