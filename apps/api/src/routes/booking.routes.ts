@@ -1,9 +1,10 @@
-// src/routes/booking.routes.ts - WITH SWAGGER DOCUMENTATION
+// apps/api/src/routes/booking.routes.ts - Ejemplo actualizado
 import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
 import { BookingController } from '../controllers/booking.controller';
-import { authenticate, authorize } from '../middleware/auth';
+import { attachUserData, authorize } from '../middleware/auth';
 import { validate, schemas } from '../middleware/validation';
+import { requireAuth } from '@clerk/express';
 
 const router: Router = Router();
 
@@ -184,7 +185,8 @@ router.get(
  */
 router.post(
   '/',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   validate(schemas.createBooking),
   asyncHandler(BookingController.create)
 );
@@ -231,7 +233,8 @@ router.post(
  */
 router.get(
   '/:id',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   validate(schemas.idParam),
   asyncHandler(BookingController.getById)
 );
@@ -279,10 +282,12 @@ router.get(
  */
 router.put(
   '/:id/cancel',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   validate(schemas.idParam),
   asyncHandler(BookingController.cancel)
 );
+
 
 /**
  * @swagger
@@ -327,7 +332,8 @@ router.put(
  */
 router.put(
   '/:id/check-in',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   validate(schemas.idParam),
   asyncHandler(BookingController.checkIn)
 );
@@ -389,7 +395,8 @@ router.put(
  */
 router.get(
   '/:id/qr',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   validate(schemas.idParam),
   asyncHandler(BookingController.getQRData)
 );
@@ -436,7 +443,8 @@ router.get(
  */
 router.get(
   '/code/:code',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.bookingCode),
   asyncHandler(BookingController.getByCode)
@@ -485,7 +493,8 @@ router.get(
  */
 router.put(
   '/code/:code/check-in',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.bookingCode),
   asyncHandler(BookingController.checkInByCode)
@@ -543,7 +552,8 @@ router.put(
  */
 router.put(
   '/session/:sessionId/no-shows',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.sessionId),
   asyncHandler(BookingController.markNoShows)

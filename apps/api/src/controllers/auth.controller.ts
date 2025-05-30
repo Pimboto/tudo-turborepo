@@ -88,7 +88,7 @@ export class AuthController {
         data: {
           userId: newUser.id,
           fullName,
-          phone,
+          phone: phone ?? null,
           preferences: {
             amenities: [],
             classTypes: [],
@@ -107,7 +107,7 @@ export class AuthController {
           data: {
             userId: newUser.id,
             companyName,
-            taxInfo,
+            taxInfo: taxInfo ?? null,
           },
         });
 
@@ -205,11 +205,11 @@ export class AuthController {
     const updatedProfile = await prisma.profile.update({
       where: { userId: user.id },
       data: {
-        fullName: profileData.fullName || user.profile?.fullName,
+        fullName: profileData.fullName ?? user.profile?.fullName,
         phone: profileData.phone,
         address: profileData.address,
         avatarUrl: profileData.avatarUrl,
-        preferences: profileData.preferences || user.profile?.preferences,
+        preferences: profileData.preferences ?? user.profile?.preferences,
       },
     });
 

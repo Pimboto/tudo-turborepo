@@ -1,12 +1,12 @@
 // apps/api/src/middleware/auth.ts
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { requireAuth, getAuth, clerkClient } from '@clerk/express';
 import { AuthenticatedRequest } from '../types';
 import { prisma } from '../prisma/client';
 import { AppError } from './errorHandler';
 
 // Main authentication middleware - Usando requireAuth() como indica la documentación
-export const authenticate = requireAuth();
+export const authenticate: RequestHandler = requireAuth();
 
 // Custom middleware to attach user data from database
 export const attachUserData = async (

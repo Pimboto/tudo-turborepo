@@ -1,9 +1,10 @@
-// src/routes/admin.routes.ts - WITH SWAGGER DOCUMENTATION
+// apps/api/src/routes/admin.routes.ts - Actualizado para Clerk
 import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
 import { AdminController } from '../controllers/admin.controller';
-import { authenticate, authorize } from '../middleware/auth';
+import { attachUserData, authorize } from '../middleware/auth';
 import { validate, schemas } from '../middleware/validation';
+import { requireAuth } from '@clerk/express';
 
 const router: Router = Router();
 
@@ -91,10 +92,12 @@ const router: Router = Router();
  */
 router.get(
   '/dashboard',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('ADMIN'),
   asyncHandler(AdminController.getDashboard)
 );
+
 
 /**
  * @swagger
@@ -158,7 +161,8 @@ router.get(
  */
 router.get(
   '/metrics',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('ADMIN'),
   validate(schemas.dateRange),
   asyncHandler(AdminController.getMetrics)
@@ -223,7 +227,8 @@ router.get(
  */
 router.get(
   '/partners/pending',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('ADMIN'),
   validate(schemas.pagination),
   asyncHandler(AdminController.getPendingVerifications)
@@ -272,7 +277,8 @@ router.get(
  */
 router.put(
   '/partners/:id/verify',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('ADMIN'),
   validate(schemas.idParam),
   asyncHandler(AdminController.verifyPartner)
@@ -321,7 +327,8 @@ router.put(
  */
 router.put(
   '/partners/:id/reject',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('ADMIN'),
   validate(schemas.rejectPartner),
   asyncHandler(AdminController.rejectPartner)
@@ -390,7 +397,8 @@ router.put(
  */
 router.get(
   '/users',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('ADMIN'),
   validate(schemas.adminUsers),
   asyncHandler(AdminController.getUsers)
@@ -446,7 +454,8 @@ router.get(
  */
 router.put(
   '/users/:id/status',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('ADMIN'),
   validate(schemas.updateUserStatus),
   asyncHandler(AdminController.updateUserStatus)
@@ -546,7 +555,8 @@ router.put(
  */
 router.get(
   '/reports/revenue',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('ADMIN'),
   validate(schemas.revenueReport),
   asyncHandler(AdminController.getRevenueReport)
@@ -634,7 +644,8 @@ router.get(
  */
 router.get(
   '/bookings',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('ADMIN'),
   validate(schemas.adminBookings),
   asyncHandler(AdminController.getBookings)
@@ -708,7 +719,8 @@ router.get(
  */
 router.get(
   '/studios',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('ADMIN'),
   validate(schemas.adminStudios),
   asyncHandler(AdminController.getStudios)
@@ -751,7 +763,8 @@ router.get(
  */
 router.put(
   '/studios/:id/toggle-status',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('ADMIN'),
   validate(schemas.idParam),
   asyncHandler(AdminController.toggleStudioStatus)

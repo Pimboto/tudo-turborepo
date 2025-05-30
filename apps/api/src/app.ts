@@ -45,7 +45,7 @@ export const createApp = (): Express => {
   }));
 
   // Request timing
-  app.use(morgan('combined', {
+  app.use(morgan('dev', {
     skip: (req) => req.url === '/health' || req.url.startsWith('/api-docs'),
   }));
 
@@ -61,7 +61,7 @@ export const createApp = (): Express => {
       status: 'ok', 
       environment: process.env.NODE_ENV ?? 'development',
       timestamp: new Date().toISOString(),
-      version: process.env.npm_package_version || '1.0.0',
+      version: process.env.npm_package_version ?? '1.0.0',
     });
   });
 
@@ -82,7 +82,7 @@ export const createApp = (): Express => {
         status: 'ok',
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV ?? 'development',
-        version: process.env.npm_package_version || '1.0.0',
+        version: process.env.npm_package_version ?? '1.0.0',
         services: {
           database: 'connected',
           clerk: clerkStatus,
