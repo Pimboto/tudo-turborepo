@@ -56,9 +56,6 @@ export const attachUserData = async (
   }
 };
 
-// Combined middleware for protected routes
-export const protectedRoute = [authenticate, attachUserData];
-
 // Middleware to check if user has specific role
 // Como indica la guía, necesitamos obtener el rol desde los metadatos
 export const requireRole = (...allowedRoles: string[]) => {

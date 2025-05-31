@@ -1,9 +1,11 @@
-// src/routes/class.routes.ts - WITH SWAGGER DOCUMENTATION
+
+// apps/api/src/routes/class.routes.ts
 import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
 import { ClassController } from '../controllers/class.controller';
-import { authenticate, authorize } from '../middleware/auth';
+import { attachUserData, authorize } from '../middleware/auth';
 import { validate, schemas } from '../middleware/validation';
+import { requireAuth } from '@clerk/express';
 
 const router: Router = Router();
 
@@ -328,7 +330,8 @@ router.get(
  */
 router.post(
   '/',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.createClass),
   asyncHandler(ClassController.create)
@@ -457,7 +460,8 @@ router.post(
  */
 router.put(
   '/:id',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.updateClass),
   asyncHandler(ClassController.update)
@@ -465,7 +469,8 @@ router.put(
 
 router.delete(
   '/:id',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.idParam),
   asyncHandler(ClassController.delete)
@@ -522,7 +527,8 @@ router.delete(
  */
 router.put(
   '/:id/status',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.updateClassStatus),
   asyncHandler(ClassController.updateStatus)
@@ -571,7 +577,8 @@ router.put(
  */
 router.post(
   '/:id/duplicate',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.idParam),
   asyncHandler(ClassController.duplicate)
@@ -644,7 +651,8 @@ router.post(
  */
 router.post(
   '/:id/sessions',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.createSession),
   asyncHandler(ClassController.createSession)
@@ -700,7 +708,8 @@ router.post(
  */
 router.delete(
   '/:id/sessions/:sessionId',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.classSession),
   asyncHandler(ClassController.cancelSession)
@@ -767,7 +776,8 @@ router.delete(
  */
 router.get(
   '/:id/sessions/:sessionId/attendees',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.classSession),
   asyncHandler(ClassController.getSessionAttendees)

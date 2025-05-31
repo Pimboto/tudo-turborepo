@@ -1,9 +1,10 @@
-// src/routes/studio.routes.ts - WITH SWAGGER DOCUMENTATION
+// apps/api/src/routes/studio.routes.ts
 import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
 import { StudioController } from '../controllers/studio.controller';
-import { authenticate, authorize, optionalAuth } from '../middleware/auth';
+import { attachUserData, authorize } from '../middleware/auth';
 import { validate, schemas } from '../middleware/validation';
+import { requireAuth } from '@clerk/express';
 
 const router: Router = Router();
 
@@ -375,7 +376,8 @@ router.get(
  */
 router.post(
   '/',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.createStudio),
   asyncHandler(StudioController.create)
@@ -482,7 +484,8 @@ router.post(
  */
 router.put(
   '/:id',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.updateStudio),
   asyncHandler(StudioController.update)
@@ -490,7 +493,8 @@ router.put(
 
 router.delete(
   '/:id',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.idParam),
   asyncHandler(StudioController.delete)
@@ -578,7 +582,8 @@ router.delete(
  */
 router.get(
   '/:id/analytics',
-  authenticate,
+  requireAuth(),
+  attachUserData,
   authorize('PARTNER'),
   validate(schemas.analyticsQuery),
   asyncHandler(StudioController.getAnalytics)
