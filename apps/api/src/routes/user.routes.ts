@@ -158,6 +158,8 @@ router.put(
  */
 router.get(
   '/bookings',
+  requireAuth(),
+  attachUserData,
   validate(schemas.userBookings),
   asyncHandler(UserController.getBookings)
 );
@@ -198,6 +200,8 @@ router.get(
  */
 router.get(
   '/bookings/upcoming',
+  requireAuth(),
+  attachUserData,
   validate(schemas.pagination),
   asyncHandler(UserController.getUpcomingClasses)
 );
@@ -238,6 +242,8 @@ router.get(
  */
 router.get(
   '/bookings/history',
+  requireAuth(),
+  attachUserData,
   validate(schemas.pagination),
   asyncHandler(UserController.getBookingHistory)
 );
@@ -279,6 +285,8 @@ router.get(
  */
 router.get(
   '/stats',
+  requireAuth(),
+  attachUserData,
   asyncHandler(UserController.getUserStats)
 );
 
@@ -340,6 +348,8 @@ router.get(
  */
 router.get(
   '/notifications',
+  requireAuth(),
+  attachUserData,
   validate(schemas.userNotifications),
   asyncHandler(UserController.getNotifications)
 );
@@ -375,6 +385,8 @@ router.get(
  */
 router.put(
   '/notifications/:id/read',
+  requireAuth(),
+  attachUserData,
   validate(schemas.idParam),
   asyncHandler(UserController.markNotificationRead)
 );
@@ -397,6 +409,8 @@ router.put(
  */
 router.put(
   '/notifications/read-all',
+  requireAuth(),
+  attachUserData,
   asyncHandler(UserController.markAllNotificationsRead)
 );
 
@@ -446,6 +460,8 @@ router.put(
  */
 router.get(
   '/referral',
+  requireAuth(),
+  attachUserData,
   asyncHandler(UserController.getReferralInfo)
 );
 
@@ -519,11 +535,15 @@ router.get(
  */
 router.get(
   '/preferences',
+  requireAuth(),
+  attachUserData,
   asyncHandler(UserController.getPreferences)
 );
 
 router.put(
   '/preferences',
+  requireAuth(),
+  attachUserData,
   validate(schemas.updatePreferences),
   asyncHandler(UserController.updatePreferences)
 );

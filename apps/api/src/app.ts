@@ -45,7 +45,7 @@ export const createApp = (): Express => {
   }));
 
   // Request timing
-  app.use(morgan('dev', {
+  app.use(morgan('tiny', {
     skip: (req) => req.url === '/health' || req.url.startsWith('/api-docs'),
   }));
 

@@ -1,4 +1,4 @@
-// src/services/partner.service.ts
+// src/services/partner.service.ts - CORREGIDO
 import { prisma } from "../prisma/client";
 import { AppError } from "../middleware/errorHandler";
 import { CreatePartnerDto } from "../types";
@@ -30,15 +30,26 @@ export class PartnerService {
       }),
     ]);
 
-    // Create notification for admin
-    await prisma.notification.create({
-      data: {
-        userId: "admin", // We'll need to get actual admin IDs
-        type: "NEW_PARTNER_REQUEST",
-        title: "New Partner Request",
-        body: `${data.companyName} has requested partner verification`,
-      },
+    // CORRECCIÓN CRÍTICA: Obtener admins reales en lugar de usar "admin" hardcodeado
+    const admins = await prisma.user.findMany({
+      where: { role: "ADMIN" },
+      select: { id: true },
     });
+
+    // Solo crear notificaciones si hay admins
+    if (admins.length > 0) {
+      await prisma.notification.createMany({
+        data: admins.map((admin) => ({
+          userId: admin.id,
+          type: "NEW_PARTNER_REQUEST",
+          title: "New Partner Request",
+          body: `${data.companyName} has requested partner verification`,
+        })),
+      });
+    } else {
+      // Log si no hay admins - útil para debugging
+      console.warn("No admin users found to notify about new partner request");
+    }
 
     return partner;
   }
@@ -257,21 +268,25 @@ export class PartnerService {
       throw new AppError(400, "Partner already verified");
     }
 
-    // Get admin users
+    // CORRECCIÓN CRÍTICA: Obtener admins reales
     const admins = await prisma.user.findMany({
       where: { role: "ADMIN" },
       select: { id: true },
     });
 
-    // Create notifications for all admins
-    await prisma.notification.createMany({
-      data: admins.map((admin) => ({
-        userId: admin.id,
-        type: "PARTNER_VERIFICATION_REQUEST",
-        title: "Partner Verification Request",
-        body: `${partner.companyName} has requested verification`,
-      })),
-    });
+    // Solo crear notificaciones si hay admins
+    if (admins.length > 0) {
+      await prisma.notification.createMany({
+        data: admins.map((admin) => ({
+          userId: admin.id,
+          type: "PARTNER_VERIFICATION_REQUEST",
+          title: "Partner Verification Request",
+          body: `${partner.companyName} has requested verification`,
+        })),
+      });
+    } else {
+      console.warn("No admin users found to notify about verification request");
+    }
 
     return { message: "Verification request sent successfully" };
   }

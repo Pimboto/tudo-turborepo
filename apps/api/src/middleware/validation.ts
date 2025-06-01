@@ -1,4 +1,4 @@
-// src/middleware/validation.ts
+// src/middleware/validation.ts - CORRECCIÓN CRÍTICA para fechas
 import { Request, Response, NextFunction } from "express";
 import { AnyZodObject, ZodError, z } from "zod";
 
@@ -194,8 +194,9 @@ export const schemas = {
       page: z.string().transform(Number).optional(),
       limit: z.string().transform(Number).optional(),
       status: z.string().optional(),
-      fromDate: z.string().datetime().optional(),
-      toDate: z.string().datetime().optional(),
+      // CORRECCIÓN CRÍTICA: Cambiar de datetime() a string() para fechas ISO
+      fromDate: z.string().optional(),
+      toDate: z.string().optional(),
     }),
   }),
 
@@ -221,7 +222,8 @@ export const schemas = {
       id: z.string(),
     }),
     body: z.object({
-      startTime: z.string().datetime(),
+      // CORRECCIÓN CRÍTICA: Cambiar datetime() a string()
+      startTime: z.string(),
       instructorName: z.string().min(1),
     }),
   }),
@@ -237,7 +239,8 @@ export const schemas = {
     query: z.object({
       studioId: z.string().optional(),
       classId: z.string().optional(),
-      date: z.string().datetime().optional(),
+      // CORRECCIÓN CRÍTICA: Cambiar datetime() a string()
+      date: z.string().optional(),
     }),
   }),
 
@@ -281,10 +284,11 @@ export const schemas = {
     }),
   }),
 
+  // CORRECCIÓN CRÍTICA: Reporte de revenue acepta fechas como strings ISO
   revenueReport: z.object({
     query: z.object({
-      startDate: z.string().datetime(),
-      endDate: z.string().datetime(),
+      startDate: z.string(), // ISO string como "2025-05-01"
+      endDate: z.string(),   // ISO string como "2025-05-31"
     }),
   }),
 
@@ -294,8 +298,9 @@ export const schemas = {
       limit: z.string().transform(Number).optional(),
       status: z.string().optional(),
       studioId: z.string().optional(),
-      startDate: z.string().datetime().optional(),
-      endDate: z.string().datetime().optional(),
+      // CORRECCIÓN CRÍTICA: Cambiar datetime() a string()
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
     }),
   }),
 
@@ -316,10 +321,11 @@ export const schemas = {
     }),
   }),
 
+  // CORRECCIÓN CRÍTICA: DateRange con strings en lugar de datetime()
   dateRange: z.object({
     query: z.object({
-      startDate: z.string().datetime().optional(),
-      endDate: z.string().datetime().optional(),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
     }),
   }),
 
@@ -328,8 +334,9 @@ export const schemas = {
       id: z.string(),
     }),
     query: z.object({
-      startDate: z.string().datetime(),
-      endDate: z.string().datetime(),
+      // CORRECCIÓN CRÍTICA: Cambiar datetime() a string()
+      startDate: z.string(),
+      endDate: z.string(),
     }),
   }),
 
@@ -338,8 +345,9 @@ export const schemas = {
       id: z.string(),
     }),
     query: z.object({
-      startDate: z.string().datetime().optional(),
-      endDate: z.string().datetime().optional(),
+      // CORRECCIÓN CRÍTICA: Cambiar datetime() a string()
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
     }),
   }),
 
@@ -357,8 +365,9 @@ export const schemas = {
     query: z.object({
       page: z.string().transform(Number).optional(),
       limit: z.string().transform(Number).optional(),
-      startDate: z.string().datetime().optional(),
-      endDate: z.string().datetime().optional(),
+      // CORRECCIÓN CRÍTICA: Cambiar datetime() a string()
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
     }),
   }),
 
@@ -379,8 +388,9 @@ export const schemas = {
       amenities: z.string().optional(),
       minPrice: z.string().transform(Number).optional(),
       maxPrice: z.string().transform(Number).optional(),
-      startDate: z.string().datetime().optional(),
-      endDate: z.string().datetime().optional(),
+      // CORRECCIÓN CRÍTICA: Cambiar datetime() a string()
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
     }),
   }),
 };

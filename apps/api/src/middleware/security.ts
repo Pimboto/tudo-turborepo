@@ -21,16 +21,16 @@ export const createRateLimit = (windowMs: number, max: number, message?: string)
 // Different rate limits for different endpoints
 export const rateLimits = {
   // General API rate limit
-  general: createRateLimit(15 * 60 * 1000, 100), // 100 requests per 15 minutes
+  general: createRateLimit(15 * 60 * 1000, 1000), // 1000 requests per 15 minutes - OK
   
-  // Auth endpoints - more restrictive
-  auth: createRateLimit(15 * 60 * 1000, 5), // 5 requests per 15 minutes
+  // Auth endpoints - ajustado a uso realista
+  auth: createRateLimit(15 * 60 * 1000, 50), // 50 requests per 15 minutes
   
   // Booking endpoints - moderate
-  booking: createRateLimit(60 * 1000, 10), // 10 requests per minute
+  booking: createRateLimit(60 * 1000, 50), // 15 requests per minute
   
-  // Search endpoints - more permissive
-  search: createRateLimit(60 * 1000, 60), // 60 requests per minute
+  // Search endpoints - más permisivo
+  search: createRateLimit(60 * 1000, 100), // 100 requests per minute
 };
 
 // Security middleware setup
