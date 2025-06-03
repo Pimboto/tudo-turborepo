@@ -1,4 +1,4 @@
-// src/routes/index.ts - CORREGIDO con tipo explícito
+// apps/api/src/routes/index.ts - ACTUALIZADO CON RUTAS DE PAGOS
 import { Router } from 'express';
 import authRoutes from './auth.routes';
 import userRoutes from './user.routes';
@@ -7,6 +7,7 @@ import studioRoutes from './studio.routes';
 import classRoutes from './class.routes';
 import bookingRoutes from './booking.routes';
 import adminRoutes from './admin.routes';
+import paymentRoutes from './payment.routes'; // NUEVA IMPORTACIÓN
 
 const router: Router = Router();
 
@@ -18,6 +19,7 @@ router.use('/studios', studioRoutes);
 router.use('/classes', classRoutes);
 router.use('/bookings', bookingRoutes);
 router.use('/admin', adminRoutes);
+router.use('/payments', paymentRoutes); // NUEVA RUTA
 
 // API info
 router.get('/', (req, res) => {
@@ -32,6 +34,7 @@ router.get('/', (req, res) => {
       classes: '/api/classes',
       bookings: '/api/bookings',
       admin: '/api/admin',
+      payments: '/api/payments', // NUEVO ENDPOINT
     },
   });
 });

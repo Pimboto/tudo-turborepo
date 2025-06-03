@@ -29,6 +29,57 @@ export const validate = (schema: AnyZodObject) => {
   };
 };
 
+export const paymentSchemas = {
+  // Crear sesión de checkout
+  createCheckoutSession: z.object({
+    body: z.object({
+      credits: z
+        .number()
+        .int()
+        .min(1, 'Minimum 1 credit required')
+        .max(10000, 'Maximum 10,000 credits per purchase'),
+    }),
+  }),
+
+  // Historial de compras
+  purchaseHistory: z.object({
+    query: z.object({
+      page: z.string().transform(Number).optional(),
+      limit: z.string().transform(Number).optional(),
+      status: z
+        .enum(['PENDING', 'COMPLETED', 'FAILED', 'CANCELLED', 'REFUNDED'])
+        .optional(),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+    }),
+  }),
+
+  // Verificar sesión de pago
+  sessionIdParam: z.object({
+    params: z.object({
+      sessionId: z.string().min(1, 'Session ID is required'),
+    }),
+  }),
+
+  // Información de éxito de pago
+  paymentSuccess: z.object({
+    query: z.object({
+      sessionId: z.string().min(1, 'Session ID is required'),
+    }),
+  }),
+
+  // Simular compra (solo desarrollo)
+  simulatePurchase: z.object({
+    body: z.object({
+      credits: z
+        .number()
+        .int()
+        .min(1, 'Minimum 1 credit required')
+        .max(1000, 'Maximum 1,000 credits for simulation'),
+    }),
+  }),
+};
+
 export const schemas = {
   // User schemas
   createUser: z.object({

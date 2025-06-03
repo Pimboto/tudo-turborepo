@@ -1,3 +1,4 @@
+// apps/api/src/prisma/schema.prisma - ACTUALIZADO CON STRIPE
 // This is your Prisma schema file
 // Learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -28,6 +29,10 @@ model User {
   referredById  String?
   referredBy    User?     @relation("Referrals", fields: [referredById], references: [id])
   referrals     User[]    @relation("Referrals")
+  
+  // NUEVAS RELACIONES STRIPE
+  purchases     Purchase[]
+  paymentIntents PaymentIntent[]
 }
 
 enum UserRole {
@@ -178,4 +183,65 @@ model SystemMetrics {
   totalRevenue    Float
   activeUsers     Int
   createdAt       DateTime  @default(now())
+}
+
+// ===== NUEVOS MODELOS PARA STRIPE =====
+
+model Purchase {
+  id              String    @id @default(cuid())
+  userId          String
+  amount          Float     // Monto en la moneda base (ej: dólares)
+  credits         Int       // Cantidad de créditos comprados
+  stripeSessionId String    @unique // ID de la sesión de Stripe Checkout
+  stripePaymentIntentId String? // ID del PaymentIntent de Stripe
+  status          PurchaseStatus @default(PENDING)
+  metadata        Json      @default("{}")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([stripeSessionId])
+}
+
+enum PurchaseStatus {
+  PENDING       // Pago iniciado pero no completado
+  COMPLETED     // Pago exitoso y créditos otorgados
+  FAILED        // Pago falló
+  CANCELLED     // Pago cancelado por el usuario
+  REFUNDED      // Pago reembolsado
+}
+
+model PaymentIntent {
+  id              String    @id @default(cuid())
+  userId          String
+  stripePaymentIntentId String @unique
+  amount          Float
+  currency        String    @default("usd")
+  status          String    // Estado del PaymentIntent de Stripe
+  clientSecret    String?   // Para el frontend
+  metadata        Json      @default("{}")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([stripePaymentIntentId])
+}
+
+model StripeWebhookEvent {
+  id                String    @id @default(cuid())
+  stripeEventId     String    @unique
+  eventType         String
+  processed         Boolean   @default(false)
+  data              Json
+  processingError   String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@index([stripeEventId])
+  @@index([processed])
+  @@index([eventType])
 }
