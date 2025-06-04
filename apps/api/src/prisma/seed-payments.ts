@@ -1,15 +1,34 @@
-// apps/api/src/prisma/seed-payments.ts
-import { PrismaClient, PurchaseStatus } from '@prisma/client';
+// apps/api/src/prisma/seed-payments.ts - CORREGIDO
+import { PrismaClient } from '@prisma/client';
 import { generateReferralCode } from '../utils/helpers';
 
 const prisma = new PrismaClient();
+
+// Definir enum localmente para evitar problemas de importación
+enum PurchaseStatus {
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  CANCELLED = 'CANCELLED',
+  REFUNDED = 'REFUNDED'
+}
+
+interface User {
+  id: string;
+  email: string;
+  clerkId: string;
+  role: string;
+  verified: boolean;
+  referralCode: string;
+  credits: number;
+}
 
 async function seedPayments() {
   console.log('🌱 Seeding payment test data...');
 
   try {
     // Crear usuarios de prueba si no existen
-    const testUsers = await Promise.all([
+    const testUsers: User[] = await Promise.all([
       prisma.user.upsert({
         where: { email: 'test-client@tudo.com' },
         update: {},
@@ -19,7 +38,7 @@ async function seedPayments() {
           role: 'CLIENT',
           verified: true,
           referralCode: generateReferralCode(),
-          credits: 25, // Créditos iniciales
+          credits: 25,
           profile: {
             create: {
               fullName: 'Test Client Payments',
@@ -38,7 +57,7 @@ async function seedPayments() {
           role: 'CLIENT',
           verified: true,
           referralCode: generateReferralCode(),
-          credits: 150, // Usuario premium con más créditos
+          credits: 150,
           profile: {
             create: {
               fullName: 'Premium Client',
@@ -58,10 +77,10 @@ async function seedPayments() {
         amount: 10.00,
         credits: 10,
         stripeSessionId: 'cs_test_sample_1',
-        status: 'COMPLETED' as PurchaseStatus,
+        status: PurchaseStatus.COMPLETED,
         metadata: {
           packageType: 'basic',
-          completedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 días atrás
+          completedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
           unitPrice: 1.00,
         },
       },
@@ -70,10 +89,10 @@ async function seedPayments() {
         amount: 15.00,
         credits: 15,
         stripeSessionId: 'cs_test_sample_2',
-        status: 'COMPLETED' as PurchaseStatus,
+        status: PurchaseStatus.COMPLETED,
         metadata: {
           packageType: 'custom',
-          completedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 días atrás
+          completedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
           unitPrice: 1.00,
         },
       },
@@ -82,10 +101,10 @@ async function seedPayments() {
         amount: 45.00,
         credits: 50,
         stripeSessionId: 'cs_test_sample_3',
-        status: 'COMPLETED' as PurchaseStatus,
+        status: PurchaseStatus.COMPLETED,
         metadata: {
           packageType: 'standard',
-          completedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 días atrás
+          completedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
           unitPrice: 0.90,
           savings: '10% off',
         },
@@ -95,10 +114,10 @@ async function seedPayments() {
         amount: 80.00,
         credits: 100,
         stripeSessionId: 'cs_test_sample_4',
-        status: 'COMPLETED' as PurchaseStatus,
+        status: PurchaseStatus.COMPLETED,
         metadata: {
           packageType: 'premium',
-          completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 día atrás
+          completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
           unitPrice: 0.80,
           savings: '20% off',
         },
@@ -108,7 +127,7 @@ async function seedPayments() {
         amount: 25.00,
         credits: 25,
         stripeSessionId: 'cs_test_pending_1',
-        status: 'PENDING' as PurchaseStatus,
+        status: PurchaseStatus.PENDING,
         metadata: {
           packageType: 'custom',
           createdAt: new Date().toISOString(),
@@ -120,10 +139,10 @@ async function seedPayments() {
         amount: 30.00,
         credits: 30,
         stripeSessionId: 'cs_test_failed_1',
-        status: 'FAILED' as PurchaseStatus,
+        status: PurchaseStatus.FAILED,
         metadata: {
           packageType: 'custom',
-          failedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 horas atrás
+          failedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
           failureReason: 'Card declined',
           unitPrice: 1.00,
         },
@@ -266,7 +285,7 @@ async function seedPayments() {
 
     console.log('\n📊 Payment Seed Summary:');
     console.log('Total purchases by status:');
-    purchaseCounts.forEach(({ status, _count }) => {
+    purchaseCounts.forEach(({ status, _count }: { status: string; _count: number }) => {
       console.log(`  ${status}: ${_count}`);
     });
     console.log(`Total revenue: $${totalRevenue._sum.amount?.toFixed(2) || '0.00'}`);
@@ -278,7 +297,7 @@ async function seedPayments() {
     });
     
     console.log('\nUser credit balances:');
-    userCredits.forEach(user => {
+    userCredits.forEach((user: { email: string; credits: number }) => {
       console.log(`  ${user.email}: ${user.credits} credits`);
     });
 

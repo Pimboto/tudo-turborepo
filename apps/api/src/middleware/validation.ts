@@ -1,4 +1,4 @@
-// src/middleware/validation.ts - CORRECCIÓN CRÍTICA para fechas
+// src/middleware/validation.ts - COMPLETO CON ESQUEMAS DE PAGO
 import { Request, Response, NextFunction } from "express";
 import { AnyZodObject, ZodError, z } from "zod";
 
@@ -27,57 +27,6 @@ export const validate = (schema: AnyZodObject) => {
       next(error);
     }
   };
-};
-
-export const paymentSchemas = {
-  // Crear sesión de checkout
-  createCheckoutSession: z.object({
-    body: z.object({
-      credits: z
-        .number()
-        .int()
-        .min(1, 'Minimum 1 credit required')
-        .max(10000, 'Maximum 10,000 credits per purchase'),
-    }),
-  }),
-
-  // Historial de compras
-  purchaseHistory: z.object({
-    query: z.object({
-      page: z.string().transform(Number).optional(),
-      limit: z.string().transform(Number).optional(),
-      status: z
-        .enum(['PENDING', 'COMPLETED', 'FAILED', 'CANCELLED', 'REFUNDED'])
-        .optional(),
-      startDate: z.string().optional(),
-      endDate: z.string().optional(),
-    }),
-  }),
-
-  // Verificar sesión de pago
-  sessionIdParam: z.object({
-    params: z.object({
-      sessionId: z.string().min(1, 'Session ID is required'),
-    }),
-  }),
-
-  // Información de éxito de pago
-  paymentSuccess: z.object({
-    query: z.object({
-      sessionId: z.string().min(1, 'Session ID is required'),
-    }),
-  }),
-
-  // Simular compra (solo desarrollo)
-  simulatePurchase: z.object({
-    body: z.object({
-      credits: z
-        .number()
-        .int()
-        .min(1, 'Minimum 1 credit required')
-        .max(1000, 'Maximum 1,000 credits for simulation'),
-    }),
-  }),
 };
 
 export const schemas = {
@@ -245,7 +194,6 @@ export const schemas = {
       page: z.string().transform(Number).optional(),
       limit: z.string().transform(Number).optional(),
       status: z.string().optional(),
-      // CORRECCIÓN CRÍTICA: Cambiar de datetime() a string() para fechas ISO
       fromDate: z.string().optional(),
       toDate: z.string().optional(),
     }),
@@ -273,7 +221,6 @@ export const schemas = {
       id: z.string(),
     }),
     body: z.object({
-      // CORRECCIÓN CRÍTICA: Cambiar datetime() a string()
       startTime: z.string(),
       instructorName: z.string().min(1),
     }),
@@ -290,7 +237,6 @@ export const schemas = {
     query: z.object({
       studioId: z.string().optional(),
       classId: z.string().optional(),
-      // CORRECCIÓN CRÍTICA: Cambiar datetime() a string()
       date: z.string().optional(),
     }),
   }),
@@ -335,11 +281,10 @@ export const schemas = {
     }),
   }),
 
-  // CORRECCIÓN CRÍTICA: Reporte de revenue acepta fechas como strings ISO
   revenueReport: z.object({
     query: z.object({
-      startDate: z.string(), // ISO string como "2025-05-01"
-      endDate: z.string(),   // ISO string como "2025-05-31"
+      startDate: z.string(),
+      endDate: z.string(),
     }),
   }),
 
@@ -349,7 +294,6 @@ export const schemas = {
       limit: z.string().transform(Number).optional(),
       status: z.string().optional(),
       studioId: z.string().optional(),
-      // CORRECCIÓN CRÍTICA: Cambiar datetime() a string()
       startDate: z.string().optional(),
       endDate: z.string().optional(),
     }),
@@ -364,6 +308,51 @@ export const schemas = {
     }),
   }),
 
+  // ESQUEMAS DE PAGO - AGREGADOS
+  createCheckoutSession: z.object({
+    body: z.object({
+      credits: z
+        .number()
+        .int()
+        .min(1, 'Minimum 1 credit required')
+        .max(10000, 'Maximum 10,000 credits per purchase'),
+    }),
+  }),
+
+  purchaseHistory: z.object({
+    query: z.object({
+      page: z.string().transform(Number).optional(),
+      limit: z.string().transform(Number).optional(),
+      status: z
+        .enum(['PENDING', 'COMPLETED', 'FAILED', 'CANCELLED', 'REFUNDED'])
+        .optional(),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+    }),
+  }),
+
+  sessionIdParam: z.object({
+    params: z.object({
+      sessionId: z.string().min(1, 'Session ID is required'),
+    }),
+  }),
+
+  paymentSuccess: z.object({
+    query: z.object({
+      sessionId: z.string().min(1, 'Session ID is required'),
+    }),
+  }),
+
+  simulatePurchase: z.object({
+    body: z.object({
+      credits: z
+        .number()
+        .int()
+        .min(1, 'Minimum 1 credit required')
+        .max(1000, 'Maximum 1,000 credits for simulation'),
+    }),
+  }),
+
   // Common schemas
   pagination: z.object({
     query: z.object({
@@ -372,7 +361,6 @@ export const schemas = {
     }),
   }),
 
-  // CORRECCIÓN CRÍTICA: DateRange con strings en lugar de datetime()
   dateRange: z.object({
     query: z.object({
       startDate: z.string().optional(),
@@ -385,7 +373,6 @@ export const schemas = {
       id: z.string(),
     }),
     query: z.object({
-      // CORRECCIÓN CRÍTICA: Cambiar datetime() a string()
       startDate: z.string(),
       endDate: z.string(),
     }),
@@ -396,7 +383,6 @@ export const schemas = {
       id: z.string(),
     }),
     query: z.object({
-      // CORRECCIÓN CRÍTICA: Cambiar datetime() a string()
       startDate: z.string().optional(),
       endDate: z.string().optional(),
     }),
@@ -416,7 +402,6 @@ export const schemas = {
     query: z.object({
       page: z.string().transform(Number).optional(),
       limit: z.string().transform(Number).optional(),
-      // CORRECCIÓN CRÍTICA: Cambiar datetime() a string()
       startDate: z.string().optional(),
       endDate: z.string().optional(),
     }),
@@ -439,7 +424,6 @@ export const schemas = {
       amenities: z.string().optional(),
       minPrice: z.string().transform(Number).optional(),
       maxPrice: z.string().transform(Number).optional(),
-      // CORRECCIÓN CRÍTICA: Cambiar datetime() a string()
       startDate: z.string().optional(),
       endDate: z.string().optional(),
     }),

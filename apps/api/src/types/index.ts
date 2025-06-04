@@ -1,7 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// apps/api/src/types/index.ts - ACTUALIZADO CON TIPOS DE PAGOS
-import { UserRole, PurchaseStatus } from '@prisma/client';
+// apps/api/src/types/index.ts - CORREGIDO
 import { Request } from 'express';
+
+// Define los enums localmente ya que Prisma puede tener problemas de importación
+export enum UserRole {
+  CLIENT = 'CLIENT',
+  PARTNER = 'PARTNER',
+  ADMIN = 'ADMIN'
+}
+
+export enum PurchaseStatus {
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  CANCELLED = 'CANCELLED',
+  REFUNDED = 'REFUNDED'
+}
 
 // Extend Express Request with authenticated user
 export interface AuthenticatedRequest extends Request {
@@ -103,18 +117,12 @@ export interface AdminDashboardData {
   }>;
 }
 
-// ===== NUEVOS TIPOS PARA PAGOS Y STRIPE =====
+// ===== TIPOS PARA PAGOS Y STRIPE =====
 
-/**
- * DTO para crear una sesión de checkout
- */
 export interface CreateCheckoutSessionDto {
   credits: number;
 }
 
-/**
- * Respuesta de sesión de checkout creada
- */
 export interface CheckoutSessionResponse {
   sessionId: string;
   url: string;
@@ -122,18 +130,12 @@ export interface CheckoutSessionResponse {
   credits: number;
 }
 
-/**
- * Filtros para historial de compras
- */
 export interface PurchaseHistoryFilters {
   status?: PurchaseStatus;
   startDate?: Date;
   endDate?: Date;
 }
 
-/**
- * Estadísticas de compras del usuario
- */
 export interface UserPurchaseStats {
   totalPurchases: number;
   totalSpent: number;
@@ -147,9 +149,6 @@ export interface UserPurchaseStats {
   };
 }
 
-/**
- * Paquete de créditos disponible
- */
 export interface CreditPackage {
   id: string;
   name: string;
@@ -161,9 +160,6 @@ export interface CreditPackage {
   savings?: string;
 }
 
-/**
- * Información de verificación de sesión de pago
- */
 export interface PaymentSessionVerification {
   purchase: {
     id: string;
@@ -181,9 +177,6 @@ export interface PaymentSessionVerification {
   };
 }
 
-/**
- * Detalles completos de una compra
- */
 export interface PurchaseDetails {
   id: string;
   userId: string;
@@ -201,12 +194,9 @@ export interface PurchaseDetails {
       fullName: string;
     };
   };
-  stripeDetails?: any; // Detalles de Stripe si están disponibles
+  stripeDetails?: any;
 }
 
-/**
- * Información de éxito de pago
- */
 export interface PaymentSuccessInfo {
   purchase: {
     id: string;
@@ -224,17 +214,11 @@ export interface PaymentSuccessInfo {
   success: boolean;
 }
 
-/**
- * Respuesta de créditos actuales
- */
 export interface CurrentCreditsResponse {
   currentCredits: number;
   totalPurchases: number;
 }
 
-/**
- * Metadata de eventos de Stripe
- */
 export interface StripeWebhookMetadata {
   userId?: string;
   credits?: string;
@@ -242,9 +226,6 @@ export interface StripeWebhookMetadata {
   [key: string]: string | undefined;
 }
 
-/**
- * Configuración de Stripe
- */
 export interface StripeConfig {
   publicKey: string;
   secretKey: string;
@@ -252,16 +233,10 @@ export interface StripeConfig {
   apiVersion: string;
 }
 
-/**
- * DTO para simular compra (solo desarrollo)
- */
 export interface SimulatePurchaseDto {
   credits: number;
 }
 
-/**
- * Evento de webhook de Stripe procesado
- */
 export interface ProcessedWebhookEvent {
   id: string;
   stripeEventId: string;
@@ -273,9 +248,6 @@ export interface ProcessedWebhookEvent {
   updatedAt: Date;
 }
 
-/**
- * Respuesta de paginación para compras
- */
 export interface PaginatedPurchasesResponse {
   purchases: Array<{
     id: string;
@@ -294,31 +266,19 @@ export interface PaginatedPurchasesResponse {
   };
 }
 
-/**
- * Constantes relacionadas con pagos
- */
 export const PAYMENT_CONSTANTS = {
-  // Precio por crédito en centavos (USD)
-  CREDIT_PRICE_CENTS: 100, // $1.00 por crédito
-  
-  // Límites de compra
+  CREDIT_PRICE_CENTS: 100,
   MIN_CREDITS_PURCHASE: 1,
   MAX_CREDITS_PURCHASE: 10000,
   MAX_CREDITS_SIMULATION: 1000,
-  
-  // Configuración de Stripe
   DEFAULT_CURRENCY: 'usd',
   SUPPORTED_PAYMENT_METHODS: ['card'],
-  
-  // Tipos de eventos de webhook que procesamos
   WEBHOOK_EVENTS: [
     'checkout.session.completed',
     'checkout.session.expired',
     'payment_intent.payment_failed',
     'payment_intent.canceled',
   ] as const,
-  
-  // Tipos de notificación relacionados con pagos
   NOTIFICATION_TYPES: {
     CREDITS_PURCHASED: 'CREDITS_PURCHASED',
     PAYMENT_FAILED: 'PAYMENT_FAILED',
@@ -327,12 +287,5 @@ export const PAYMENT_CONSTANTS = {
   } as const,
 } as const;
 
-/**
- * Tipo para los eventos de webhook que manejamos
- */
 export type SupportedWebhookEvent = typeof PAYMENT_CONSTANTS.WEBHOOK_EVENTS[number];
-
-/**
- * Tipo para los tipos de notificación de pagos
- */
 export type PaymentNotificationType = typeof PAYMENT_CONSTANTS.NOTIFICATION_TYPES[keyof typeof PAYMENT_CONSTANTS.NOTIFICATION_TYPES];
