@@ -10,6 +10,7 @@ import type { Dictionary } from "@/lib/dictionary";
 import type { Locale } from "@/middleware";
 import { usePathname } from "next/navigation";
 import { useUser, SignInButton, UserButton } from "@clerk/nextjs";
+import { CreditsDisplay } from "./credits-display";
 
 interface NavbarProps {
   lang?: Locale;
@@ -186,6 +187,9 @@ export default function Navbar({
 
           {isSignedIn ? (
             <div className="flex items-center space-x-4">
+              {/* Credits Display */}
+              <CreditsDisplay variant={variant} />
+
               {/* Mensaje de bienvenida opcional */}
               {user?.firstName && (
                 <span className={`${textColor} hidden lg:block`}>
@@ -210,8 +214,8 @@ export default function Navbar({
                     colorPrimary: "#FF9422", // Tu color primario
                   },
                 }}
-                userProfileMode="modal" // Cambio principal aquí
-                showName={false} // Opcional: mostrar el nombre en el botón
+                userProfileMode="modal"
+                showName={false}
               />
             </div>
           ) : (
