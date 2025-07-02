@@ -1,0 +1,329 @@
+{
+  "searchClasses": {
+    "meta": {
+      "title": "Search Classes | TUDO",
+      "description": "Find fitness classes, gyms, and wellness centers near you."
+    },
+    "filterBar": {
+      "location": "Location",
+      "searchLocation": "Search location...",
+      "searching": "Searching...",
+      "noLocationsFound": "No locations found",
+      "fitness": "Fitness",
+      "activities": "Activities",
+      "facilities": "Facilities",
+      "distance": "Distance",
+      "distanceRange": "Distance Range",
+      "km": "km",
+      "gymsIn": "Gyms in",
+      "gymsAndFitness": "Gyms and Fitness Centers"
+    },
+    "resultsPanel": {
+      "noResultsFound": "No results found",
+      "selectLocation": "Please select a location or adjust your filters to see results.",
+      "adjustFilters": "Try adjusting your filters to see more results.",
+      "clearFilters": "Clear filters",
+      "resultsFound": "Results found"
+    },
+    "map": {
+      "searchInArea": "Search in this area",
+      "loadingMap": "Loading map...",
+      "loadingResources": "Loading map resources...",
+      "currentArea": "Current area"
+    },
+    "constants": {
+      "fitnessOptions": [
+        "Gym",
+        "Yoga",
+        "Pilates",
+        "Crossfit",
+        "Functional",
+        "Spinning"
+      ],
+      "activitiesOptions": [
+        "Swimming",
+        "Dance",
+        "Martial Arts",
+        "Boxing",
+        "Climbing",
+        "Running"
+      ],
+      "facilitiesOptions": [
+        "Pool",
+        "Sauna",
+        "Showers",
+        "Lockers",
+        "Parking",
+        "Cafeteria"
+      ]
+    }
+  },
+
+  "ctaSection": {
+    "title": "Start your fitness journey today",
+    "description": "Join thousands of people who are already transforming their lives with TUDO. Access hundreds of studios with a single pass.",
+    "freeTrialButton": "Try free for 7 days",
+    "viewPlansButton": "View plans",
+    "noCommitment": "No commitment. Cancel anytime."
+  },
+  
+  "featureSection": {
+    "features": [
+      {
+        "icon": "brain",
+        "title": "Class Variety",
+        "description": "Access thousands of different fitness classes, from yoga and pilates to HIIT and spinning, all on a single platform."
+      },
+      {
+        "icon": "lightning",
+        "title": "Instant Bookings",
+        "description": "Book classes with just one click, no waiting or calls. Confirm your attendance instantly and organize your fitness schedule."
+      },
+      {
+        "icon": "shield",
+        "title": "Flexible Membership",
+        "description": "Choose between different plans according to your needs. No long-term commitments, cancel or change whenever you want."
+      }
+    ]
+  },
+
+  "aboutpage": {
+    "metadata": {
+      "title": "About TUDO | Our Philosophy",
+      "description": "Learn about TUDO's philosophy and the power behind the platform revolutionizing fitness and wellness experiences."
+    },
+    "madeToMove": {
+      "title": "MADE TO MOVE",
+      "subtitle": "OUR DNA",
+      "paragraph1": "We're more than a service: we're the impulse that transforms movement into wellbeing and purpose.",
+      "paragraph2": "We believe in the power of progress, of connecting with yourself and the world, of opening doors that expand horizons and break barriers that seemed unbreakable.",
+      "paragraph3": "It's not just about physical activity, but about the movement of being: a balance between body, mind, and spirit that breaks through the barriers that lead us to surpass ourselves, reminding us that we can always give more than we imagine."
+    },
+    "noStrings": {
+      "title": "NO STRINGS, JUST JOY",
+      "subtitle": "OUR VALUE PROMISE",
+      "paragraph1": "We are the space where wellbeing has no strings attached. No commitments, no clauses, just experiences designed to move you, care for you, and let you enjoy at your own pace.",
+      "paragraph2": "Here you can explore new ways to train, relax, and try something different every day. Because feeling good shouldn't come with conditions, but with options."
+    },
+    "makeItHappen": {
+      "title": "WE MAKE IT HAPPEN",
+      "subtitle": "OUR PURPOSE",
+      "paragraph1": "Here we don't just dream big: we make it reality.",
+      "paragraph2": "We have no constraints, only opportunities waiting to be conquered. We create an experience where you decide the how, when, and where, because we know you can.",
+      "paragraph3": "Our promise is clear: to give you the power to transform your goals into achievements and your intentions into action. Every step you take with us is designed for you to exceed your own standards, discover new possibilities, and live without commitments.",
+      "discoverLink": "Discover how we make it happen"
+    }
+  },
+
+  "business": {
+    "partnership": {
+      "title1": "Grow Your",
+      "title2": "Business",
+      "title3": "Together",
+      "becomePartner": "Become a Partner",
+      "companiesText": "500+ companies already trust us"
+    },
+    "benefits": {
+      "title": "Partnership",
+      "titleHighlight": "Benefits",
+      "description": "Discover the advantages of becoming our business partner",
+      "benefits": [
+        "Expand your customer base",
+        "Increase visibility in your market",
+        "Access to marketing resources",
+        "Dedicated account manager",
+        "Analytics and performance tracking",
+        "Networking opportunities",
+        "Priority technical support",
+        "Co-marketing opportunities"
+      ]
+    },
+    "testimonials": {
+      "title": "What Our",
+      "titleHighlight": "Partners Say",
+      "description": "Hear from businesses that have already joined our network",
+      "testimonials": [
+        {
+          "quote": "Partnering with this platform has been a game-changer for our business. We've seen a 40% increase in new customers.",
+          "author": "Sarah Johnson",
+          "position": "CEO, FitLife Studios"
+        },
+        {
+          "quote": "The support team is incredible. They're always available to help and have provided valuable insights for our growth.",
+          "author": "Michael Chen",
+          "position": "Owner, Wellness Center"
+        },
+        {
+          "quote": "The partnership has exceeded our expectations. The onboarding process was smooth and we started seeing results within weeks.",
+          "author": "Emma Rodriguez",
+          "position": "Director, Health Hub"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Ready to",
+      "titleHighlight": "Grow Together",
+      "description": "Join our network of successful businesses and start expanding your reach today.",
+      "buttonText": "Become a Partner"
+    }
+  },
+
+  "pricing": {
+    "hero": {
+      "title": "Simple, Transparent Pricing",
+      "description": "Choose the plan that works best for you. All plans include access to our core features.",
+      "monthlyButton": "Monthly Billing",
+      "annualButton": "Annual Billing (Save 20%)"
+    },
+    "saveMoney": {
+      "title": "Save Money with a Plan",
+      "description": "You can save money with exclusive member rates and promotions for new studios and first-time visits.",
+      "tryNowButton": "Try it now for $29",
+      "yogaClass": "Power Flow Yoga",
+      "day": "Tuesday",
+      "time": "6:30 PM",
+      "instructor": "Instructor: Alex J.",
+      "credits": "credits",
+      "saveLabel": "Save 50%",
+      "reserveButton": "Reserve"
+    },
+    "howCredits": {
+      "title": "How Credits Work",
+      "description": "Credits can be used to book classes or appointments. The number of credits required for each booking varies based on the type of activity, location, popularity, and time.",
+      "yoga": "Yoga",
+      "pilates": "Pilates",
+      "hiit": "HIIT",
+      "spa": "Spa",
+      "example": {
+        "title": "Example: Sarah's Routine",
+        "description": "Sarah has the Plus plan with 50 credits per month. Here's how she uses them:",
+        "hotYoga": "Hot Yoga",
+        "strengthTraining": "Strength Training",
+        "meditation": "Meditation",
+        "pilates": "Pilates",
+        "total": "Total"
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "description": "Find answers to the most common questions about our credit system and membership plans.",
+      "questions": {
+        "howItWorks": {
+          "question": "How does the credit system work?",
+          "answer": "Our credit system allows you to book classes and sessions at various fitness and wellness venues. Each activity costs a certain number of credits based on factors like class type, location, popularity, and time slot. You receive a set number of credits each month based on your subscription plan, and you can use them however you prefer."
+        },
+        "cancelSubscription": {
+          "question": "Can I cancel my subscription anytime?",
+          "answer": "Yes, you can cancel your subscription at any time with no cancellation fees. Your subscription will remain active until the end of your current billing period, and you won't be charged again after that. You can easily manage your subscription from your account settings."
+        },
+        "creditsExpire": {
+          "question": "Do unused credits expire?",
+          "answer": "Credits roll over for a limited time depending on your plan: Basic plan credits roll over for up to 2 months, Plus plan for up to 3 months, and Premium plan for up to 4 months. After that period, unused credits will expire. This policy encourages regular activity while still giving you flexibility."
+        },
+        "changePlan": {
+          "question": "Can I upgrade or downgrade my plan?",
+          "answer": "Yes, you can upgrade, downgrade, or cancel your plan at any time from your account settings. If you upgrade, the change takes effect immediately, and you'll be charged a prorated amount for the remainder of your billing cycle. If you downgrade, the change will take effect at the start of your next billing cycle."
+        },
+        "bookClass": {
+          "question": "How do I book a class?",
+          "answer": "You can book classes through our website or mobile app. Simply browse available classes by location, activity type, or time, and reserve your spot using your available credits. You can book classes up to a week in advance, and you'll receive a confirmation email with all the details after booking."
+        },
+        "cancellationPolicy": {
+          "question": "What is the cancellation policy for booked classes?",
+          "answer": "You can cancel a booked class up to 12 hours before the scheduled start time to receive a full credit refund. Cancellations made less than 12 hours in advance will not be refunded. This policy helps ensure that spots remain available for other members and that our partner studios can plan accordingly."
+        },
+        "additionalFees": {
+          "question": "Are there any additional fees beyond the subscription?",
+          "answer": "No, there are no hidden fees. Your monthly subscription covers all the credits you need to book classes. Some premium or special events might require additional credits, but these will be clearly marked, and you'll always see the credit cost before booking."
+        },
+        "shareCredits": {
+          "question": "Can I share my credits with friends or family?",
+          "answer": "Premium plan members can share up to 20 credits per month with friends or family. Basic and Plus plan members cannot share credits, but they can purchase gift cards or invite friends using our referral program to earn bonus credits."
+        }
+      },
+      "stillQuestions": {
+        "title": "Still have questions?",
+        "description": "Our support team is here to help you with any other questions you might have.",
+        "contactButton": "Contact Support"
+      }
+    }
+  },
+
+  "navbar": {
+    "searchClasses": "Search classes",
+    "pricing": "Pricing",
+    "about": "About",
+    "login": "Log in",
+    "signup": "Sign up",
+    "business": "Business"
+  },
+  "hero": {
+    "title": "Your all-access pass to fitness, wellness & beauty",
+    "slogan": "No strings. just joy.",
+    "bookClass": "BOOK A CLASS",
+    "startHere": "NEW? START HERE"
+  },
+  "discover": {
+    "title": "Discover Our Classes",
+    "description": "From high-intensity workouts to mindful meditation sessions, we have everything you need to achieve your wellness goals.",
+    "fitness": {
+      "title": "Fitness",
+      "description": "High-intensity workouts designed to challenge and transform your body.",
+      "link": "Explore classes →"
+    },
+    "wellness": {
+      "title": "Wellness",
+      "description": "Mindful practices to restore balance and enhance your overall wellbeing.",
+      "link": "Explore classes →"
+    },
+    "beauty": {
+      "title": "Beauty",
+      "description": "Treatments and services to help you look and feel your best.",
+      "link": "Explore services →"
+    }
+  },
+  "login": {
+    "title": "Welcome back",
+    "description": "Enter your email and password to log in to your account",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "loginButton": "Log in",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up"
+  },
+  "register": {
+    "title": "Create an account",
+    "description": "Enter your information to create your TUDO account",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "password": "Password",
+    "terms": "I agree to the",
+    "termsLink": "terms of service",
+    "privacyLink": "privacy policy",
+    "termsAnd": "and",
+    "signUpButton": "Sign up for free trial",
+    "haveAccount": "Already have an account?",
+    "logIn": "Log in"
+  },
+
+  "footer": {
+    "description": "Access to gyms, fitness studios, salons, and spas worldwide through a single app.",
+    "companyHeading": "Company",
+    "aboutUs": "About Us",
+    "careers": "Careers",
+    "partners": "Partners",
+    "press": "Press",
+    "resourcesHeading": "Resources",
+    "blog": "Blog",
+    "helpCenter": "Help Center",
+    "faq": "FAQ",
+    "contactUs": "Contact Us",
+    "legalHeading": "Legal",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "cookies": "Cookie Policy",
+    "copyright": "© {year} TUDO. All rights reserved."
+  }
+}

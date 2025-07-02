@@ -1,0 +1,331 @@
+{
+
+  "ctaSection": {
+    "title": "Comienza tu viaje fitness hoy",
+    "description": "Únete a miles de personas que ya están transformando su vida con TUDO. Accede a cientos de estudios con un solo pase.",
+    "freeTrialButton": "Prueba gratis por 7 días",
+    "viewPlansButton": "Ver planes",
+    "noCommitment": "Sin compromiso. Cancela cuando quieras."
+  },
+  
+  "featureSection": {
+    "features": [
+      {
+        "icon": "brain",
+        "title": "Variedad de Clases",
+        "description": "Accede a miles de clases de fitness diferentes, desde yoga y pilates hasta HIIT y spinning, todo en una sola plataforma."
+      },
+      {
+        "icon": "lightning",
+        "title": "Reservas Instantáneas",
+        "description": "Reserva clases con un solo clic, sin esperas ni llamadas. Confirma tu asistencia al instante y organiza tu agenda fitness."
+      },
+      {
+        "icon": "shield",
+        "title": "Membresía Flexible",
+        "description": "Elige entre diferentes planes según tus necesidades. Sin compromisos a largo plazo, cancela o cambia cuando quieras."
+      }
+    ]
+  },
+
+  "searchClasses": {
+    "meta": {
+      "title": "Buscar Clases | TUDO",
+      "description": "Encuentra clases de fitness, gimnasios y centros de bienestar cerca de ti."
+    },
+    "filterBar": {
+      "location": "Ubicación",
+      "searchLocation": "Buscar ubicación...",
+      "searching": "Buscando...",
+      "noLocationsFound": "No se encontraron ubicaciones",
+      "fitness": "Fitness",
+      "activities": "Actividades",
+      "facilities": "Instalaciones",
+      "distance": "Distancia",
+      "distanceRange": "Rango de Distancia",
+      "km": "km",
+      "gymsIn": "Gimnasios en",
+      "gymsAndFitness": "Gimnasios y Centros de Fitness"
+    },
+    "resultsPanel": {
+      "noResultsFound": "No se encontraron resultados",
+      "selectLocation": "Por favor selecciona una ubicación o ajusta tus filtros para ver resultados.",
+      "adjustFilters": "Intenta ajustar tus filtros para ver más resultados.",
+      "clearFilters": "Borrar filtros",
+      "resultsFound": "Resultados encontrados"
+    },
+    "map": {
+      "searchInArea": "Buscar en esta área",
+      "loadingMap": "Cargando mapa...",
+      "loadingResources": "Cargando recursos del mapa...",
+      "currentArea": "Área actual"
+    },
+    "constants": {
+      "fitnessOptions": [
+        "Gimnasio",
+        "Yoga",
+        "Pilates",
+        "Crossfit",
+        "Funcional",
+        "Spinning"
+      ],
+      "activitiesOptions": [
+        "Natación",
+        "Baile",
+        "Artes Marciales",
+        "Boxeo",
+        "Escalada",
+        "Running"
+      ],
+      "facilitiesOptions": [
+        "Piscina",
+        "Sauna",
+        "Duchas",
+        "Casilleros",
+        "Estacionamiento",
+        "Cafetería"
+      ]
+    }
+  },
+
+  "aboutpage": {
+    "metadata": {
+      "title": "Acerca de TUDO | Nuestra Filosofía",
+      "description": "Conoce la filosofía de TUDO y el poder detrás de la plataforma que está revolucionando las experiencias de fitness y bienestar."
+    },
+    "madeToMove": {
+      "title": "HECHOS PARA MOVERSE",
+      "subtitle": "NUESTRO ADN",
+      "paragraph1": "Somos más que un servicio: somos el impulso que transforma el movimiento en bienestar y propósito.",
+      "paragraph2": "Creemos en el poder del progreso, de conectar contigo mismo y con el mundo, de abrir puertas que expanden horizontes y romper barreras que parecían inquebrantables.",
+      "paragraph3": "No se trata solo de actividad física, sino del movimiento del ser: un equilibrio entre cuerpo, mente y espíritu que rompe las barreras que nos llevan a superarnos, recordándonos que siempre podemos dar más de lo que imaginamos."
+    },
+    "noStrings": {
+      "title": "SIN ATADURAS, SOLO ALEGRÍA",
+      "subtitle": "NUESTRA PROMESA DE VALOR",
+      "paragraph1": "Somos el espacio donde el bienestar no tiene ataduras. Sin compromisos, sin cláusulas, solo experiencias diseñadas para moverte, cuidarte y dejarte disfrutar a tu propio ritmo.",
+      "paragraph2": "Aquí puedes explorar nuevas formas de entrenar, relajarte y probar algo diferente cada día. Porque sentirse bien no debería venir con condiciones, sino con opciones."
+    },
+    "makeItHappen": {
+      "title": "LO HACEMOS REALIDAD",
+      "subtitle": "NUESTRO PROPÓSITO",
+      "paragraph1": "Aquí no solo soñamos en grande: lo hacemos realidad.",
+      "paragraph2": "No tenemos limitaciones, solo oportunidades esperando ser conquistadas. Creamos una experiencia donde tú decides el cómo, cuándo y dónde, porque sabemos que puedes.",
+      "paragraph3": "Nuestra promesa es clara: darte el poder de transformar tus metas en logros y tus intenciones en acción. Cada paso que das con nosotros está diseñado para que superes tus propios estándares, descubras nuevas posibilidades y vivas sin compromisos.",
+      "discoverLink": "Descubre cómo lo hacemos realidad"
+    }
+  },
+
+  "business": {
+    "partnership": {
+      "title1": "Haz Crecer",
+      "title2": "Tu Negocio",
+      "title3": "Con Nosotros",
+      "becomePartner": "Conviértete en Socio",
+      "companiesText": "Más de 500 empresas ya confían en nosotros"
+    },
+    "benefits": {
+      "title": "Beneficios de la",
+      "titleHighlight": "Asociación",
+      "description": "Descubre las ventajas de convertirte en nuestro socio comercial",
+      "benefits": [
+        "Amplía tu base de clientes",
+        "Aumenta la visibilidad en tu mercado",
+        "Acceso a recursos de marketing",
+        "Gerente de cuenta dedicado",
+        "Análisis y seguimiento del rendimiento",
+        "Oportunidades de networking",
+        "Soporte técnico prioritario",
+        "Oportunidades de co-marketing"
+      ]
+    },
+    "testimonials": {
+      "title": "Lo Que Dicen",
+      "titleHighlight": "Nuestros Socios",
+      "description": "Escucha a las empresas que ya se han unido a nuestra red",
+      "testimonials": [
+        {
+          "quote": "Asociarse con esta plataforma ha sido un cambio radical para nuestro negocio. Hemos visto un aumento del 40% en nuevos clientes.",
+          "author": "Sarah Johnson",
+          "position": "CEO, FitLife Studios"
+        },
+        {
+          "quote": "El equipo de soporte es increíble. Siempre están disponibles para ayudar y han proporcionado información valiosa para nuestro crecimiento.",
+          "author": "Michael Chen",
+          "position": "Propietario, Centro de Bienestar"
+        },
+        {
+          "quote": "La asociación ha superado nuestras expectativas. El proceso de incorporación fue fluido y comenzamos a ver resultados en semanas.",
+          "author": "Emma Rodriguez",
+          "position": "Directora, Health Hub"
+        }
+      ]
+    },
+    "cta": {
+      "title": "¿Listo para",
+      "titleHighlight": "Crecer Juntos",
+      "description": "Únete a nuestra red de negocios exitosos y comienza a expandir tu alcance hoy.",
+      "buttonText": "Conviértete en Socio"
+    }
+  },
+
+  "pricing": {
+    "hero": {
+      "title": "Precios Simples y Transparentes",
+      "description": "Elige el plan que mejor se adapte a ti. Todos los planes incluyen acceso a nuestras funciones principales.",
+      "monthlyButton": "Facturación Mensual",
+      "annualButton": "Facturación Anual (Ahorra 20%)"
+    },
+    "saveMoney": {
+      "title": "Ahorra Dinero con un Plan",
+      "description": "Puedes ahorrar dinero con tarifas exclusivas para miembros y promociones para nuevos estudios y primeras visitas.",
+      "tryNowButton": "Pruébalo ahora por $29",
+      "yogaClass": "Yoga Power Flow",
+      "day": "Martes",
+      "time": "6:30 PM",
+      "instructor": "Instructor: Alex J.",
+      "credits": "créditos",
+      "saveLabel": "Ahorra 50%",
+      "reserveButton": "Reservar"
+    },
+    "howCredits": {
+      "title": "Cómo Funcionan los Créditos",
+      "description": "Los créditos se pueden usar para reservar clases o citas. El número de créditos requeridos para cada reserva varía según el tipo de actividad, ubicación, popularidad y hora.",
+      "yoga": "Yoga",
+      "pilates": "Pilates",
+      "hiit": "HIIT",
+      "spa": "Spa",
+      "example": {
+        "title": "Ejemplo: Rutina de Sarah",
+        "description": "Sarah tiene el plan Plus con 50 créditos por mes. Así es como los usa:",
+        "hotYoga": "Hot Yoga",
+        "strengthTraining": "Entrenamiento de Fuerza",
+        "meditation": "Meditación",
+        "pilates": "Pilates",
+        "total": "Total"
+      }
+    },
+    "faq": {
+      "title": "Preguntas Frecuentes",
+      "description": "Encuentra respuestas a las preguntas más comunes sobre nuestro sistema de créditos y planes de membresía.",
+      "questions": {
+        "howItWorks": {
+          "question": "¿Cómo funciona el sistema de créditos?",
+          "answer": "Nuestro sistema de créditos te permite reservar clases y sesiones en varios lugares de fitness y bienestar. Cada actividad cuesta cierto número de créditos según factores como el tipo de clase, ubicación, popularidad y horario. Recibes un número establecido de créditos cada mes según tu plan de suscripción, y puedes usarlos como prefieras."
+        },
+        "cancelSubscription": {
+          "question": "¿Puedo cancelar mi suscripción en cualquier momento?",
+          "answer": "Sí, puedes cancelar tu suscripción en cualquier momento sin cargos por cancelación. Tu suscripción permanecerá activa hasta el final de tu período de facturación actual, y no se te cobrará nuevamente después de eso. Puedes gestionar fácilmente tu suscripción desde la configuración de tu cuenta."
+        },
+        "creditsExpire": {
+          "question": "¿Caducan los créditos no utilizados?",
+          "answer": "Los créditos se acumulan por un tiempo limitado dependiendo de tu plan: los créditos del plan Básico se acumulan hasta por 2 meses, el plan Plus hasta por 3 meses y el plan Premium hasta por 4 meses. Después de ese período, los créditos no utilizados caducarán. Esta política fomenta la actividad regular mientras te brinda flexibilidad."
+        },
+        "changePlan": {
+          "question": "¿Puedo actualizar o bajar de categoría mi plan?",
+          "answer": "Sí, puedes actualizar, bajar de categoría o cancelar tu plan en cualquier momento desde la configuración de tu cuenta. Si actualizas, el cambio entra en vigor inmediatamente y se te cobrará un monto prorrateado por el resto de tu ciclo de facturación. Si bajas de categoría, el cambio entrará en vigor al comienzo de tu próximo ciclo de facturación."
+        },
+        "bookClass": {
+          "question": "¿Cómo reservo una clase?",
+          "answer": "Puedes reservar clases a través de nuestro sitio web o aplicación móvil. Simplemente navega por las clases disponibles por ubicación, tipo de actividad u hora, y reserva tu lugar usando tus créditos disponibles. Puedes reservar clases con hasta una semana de anticipación, y recibirás un correo electrónico de confirmación con todos los detalles después de la reserva."
+        },
+        "cancellationPolicy": {
+          "question": "¿Cuál es la política de cancelación para las clases reservadas?",
+          "answer": "Puedes cancelar una clase reservada hasta 12 horas antes de la hora de inicio programada para recibir un reembolso completo de créditos. Las cancelaciones realizadas con menos de 12 horas de anticipación no serán reembolsadas. Esta política ayuda a garantizar que los lugares permanezcan disponibles para otros miembros y que nuestros estudios asociados puedan planificar en consecuencia."
+        },
+        "additionalFees": {
+          "question": "¿Hay tarifas adicionales más allá de la suscripción?",
+          "answer": "No, no hay tarifas ocultas. Tu suscripción mensual cubre todos los créditos que necesitas para reservar clases. Algunos eventos premium o especiales pueden requerir créditos adicionales, pero estos estarán claramente marcados, y siempre verás el costo en créditos antes de reservar."
+        },
+        "shareCredits": {
+          "question": "¿Puedo compartir mis créditos con amigos o familiares?",
+          "answer": "Los miembros del plan Premium pueden compartir hasta 20 créditos por mes con amigos o familiares. Los miembros del plan Básico y Plus no pueden compartir créditos, pero pueden comprar tarjetas de regalo o invitar a amigos usando nuestro programa de referidos para ganar créditos adicionales."
+        }
+      },
+      "stillQuestions": {
+        "title": "¿Todavía tienes preguntas?",
+        "description": "Nuestro equipo de soporte está aquí para ayudarte con cualquier otra pregunta que puedas tener.",
+        "contactButton": "Contactar a Soporte"
+      }
+    }
+  },
+
+  "navbar": {
+    "searchClasses": "Buscar clases",
+    "pricing": "Precios",
+    "about": "Acerca de",
+    "login": "Iniciar sesión",
+    "signup": "Registrarse",
+    "business": "Negocios"
+  },
+  "hero": {
+    "title": "Tu pase de acceso total a fitness, bienestar y belleza",
+    "slogan": "Sin ataduras. solo alegría.",
+    "bookClass": "RESERVAR UNA CLASE",
+    "startHere": "¿NUEVO? EMPIEZA AQUÍ"
+  },
+  "discover": {
+    "title": "Descubre Nuestras Clases",
+    "description": "Desde entrenamientos de alta intensidad hasta sesiones de meditación consciente, tenemos todo lo que necesitas para alcanzar tus objetivos de bienestar.",
+    "fitness": {
+      "title": "Fitness",
+      "description": "Entrenamientos de alta intensidad diseñados para desafiar y transformar tu cuerpo.",
+      "link": "Explorar clases →"
+    },
+    "wellness": {
+      "title": "Bienestar",
+      "description": "Prácticas conscientes para restaurar el equilibrio y mejorar tu bienestar general.",
+      "link": "Explorar clases →"
+    },
+    "beauty": {
+      "title": "Belleza",
+      "description": "Tratamientos y servicios para ayudarte a lucir y sentirte mejor.",
+      "link": "Explorar servicios →"
+    }
+  },
+  "login": {
+    "title": "Bienvenido de nuevo",
+    "description": "Ingresa tu correo electrónico y contraseña para acceder a tu cuenta",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "loginButton": "Iniciar sesión",
+    "noAccount": "¿No tienes una cuenta?",
+    "signUp": "Regístrate"
+  },
+  "register": {
+    "title": "Crear una cuenta",
+    "description": "Ingresa tu información para crear tu cuenta de TUDO",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "terms": "Acepto los",
+    "termsLink": "términos de servicio",
+    "privacyLink": "política de privacidad",
+    "termsAnd": "y",
+    "signUpButton": "Registrarse para prueba gratuita",
+    "haveAccount": "¿Ya tienes una cuenta?",
+    "logIn": "Iniciar sesión"
+  },
+
+
+    "footer": {
+      "description": "Acceso a gimnasios, estudios de fitness, salones y spas en todo el mundo a través de una sola aplicación.",
+      "companyHeading": "Empresa",
+      "aboutUs": "Sobre Nosotros",
+      "careers": "Empleo",
+      "partners": "Socios",
+      "press": "Prensa",
+      "resourcesHeading": "Recursos",
+      "blog": "Blog",
+      "helpCenter": "Centro de Ayuda",
+      "faq": "Preguntas Frecuentes",
+      "contactUs": "Contáctanos",
+      "legalHeading": "Legal",
+      "terms": "Términos de Servicio",
+      "privacy": "Política de Privacidad",
+      "cookies": "Política de Cookies",
+      "copyright": "© {year} TUDO. Todos los derechos reservados."
+    }
+}
