@@ -31,6 +31,7 @@ export type Dictionary = {
     login: string;
     signup: string;
     business: string;
+    hello: string;
   };
 
   searchClasses: {

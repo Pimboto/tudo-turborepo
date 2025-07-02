@@ -256,7 +256,8 @@
     "about": "Acerca de",
     "login": "Iniciar sesión",
     "signup": "Registrarse",
-    "business": "Negocios"
+    "business": "Negocios",
+    "hello": "¡Hola, {name}!"
   },
   "hero": {
     "title": "Tu pase de acceso total a fitness, bienestar y belleza",

@@ -1,20 +1,21 @@
-//components\navbar.tsx
-"use client"
+// components/navbar.tsx
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import MobileMenu from "./mobile-menu"
-import LanguageSwitcher from "./language-switcher"
-import type { Dictionary } from "@/lib/dictionary"
-import type { Locale } from "@/middleware"
-import { usePathname } from "next/navigation"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import MobileMenu from "./mobile-menu";
+import LanguageSwitcher from "./language-switcher";
+import type { Dictionary } from "@/lib/dictionary";
+import type { Locale } from "@/middleware";
+import { usePathname } from "next/navigation";
+import { useUser, SignInButton, UserButton } from "@clerk/nextjs";
 
 interface NavbarProps {
-  lang?: Locale
-  dictionary?: Dictionary["navbar"]
-  variant?: "light" | "dark" // Nueva prop para controlar el estilo
-  transparentOnTop?: boolean // Controla si el navbar es transparente al inicio
+  lang?: Locale;
+  dictionary?: Dictionary["navbar"];
+  variant?: "light" | "dark"; // Nueva prop para controlar el estilo
+  transparentOnTop?: boolean; // Controla si el navbar es transparente al inicio
 }
 
 export default function Navbar({
@@ -23,32 +24,43 @@ export default function Navbar({
   variant = "dark", // Por defecto, texto blanco para fondos oscuros
   transparentOnTop = true, // Por defecto, transparente al inicio
 }: NavbarProps) {
-  const pathname = usePathname()
+  const pathname = usePathname();
   // Extraer el idioma del pathname si no se proporciona como prop
-  const currentLang = lang || (pathname?.split("/")[1] as Locale) || "en"
+  const currentLang = lang || (pathname?.split("/")[1] as Locale) || "en";
+  const { isSignedIn, user, isLoaded } = useUser();
 
-  const [scrolled, setScrolled] = useState(false)
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       // Detectar si hemos hecho scroll más de 10px
-      const isScrolled = window.scrollY > 10
+      const isScrolled = window.scrollY > 10;
       if (isScrolled !== scrolled) {
-        setScrolled(isScrolled)
+        setScrolled(isScrolled);
       }
-    }
+    };
 
     // Añadir el event listener
-    window.addEventListener("scroll", handleScroll)
+    window.addEventListener("scroll", handleScroll);
 
     // Comprobar el estado inicial
-    handleScroll()
+    handleScroll();
 
     // Limpiar el event listener al desmontar
     return () => {
-      window.removeEventListener("scroll", handleScroll)
-    }
-  }, [scrolled])
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [scrolled]);
+
+  // Log para debugging
+  useEffect(() => {
+    console.log("👤 User state:", {
+      isSignedIn,
+      isLoaded,
+      userId: user?.id,
+      email: user?.emailAddresses?.[0]?.emailAddress,
+    });
+  }, [isSignedIn, isLoaded, user]);
 
   // Usar valores por defecto si dictionary no está disponible
   const navDict = dictionary || {
@@ -56,42 +68,80 @@ export default function Navbar({
     pricing: "Pricing",
     about: "About",
     business: "Business",
+    hello: "Hello",
     login: "Login",
     signup: "Sign Up",
-  }
+  };
 
   // Determinar las clases de estilo basadas en la variante y el estado de scroll
   const getNavbarClasses = () => {
     // Clases base - Lower z-index to ensure dropdowns can appear above it
     // Using isolation-auto to create a new stacking context but not isolate the dropdowns
-    let classes = "fixed top-0 left-0 right-0 w-full p-6 md:p-8 z-40 transition-all duration-300 isolation-auto "
+    let classes =
+      "fixed top-0 left-0 right-0 w-full p-6 md:p-8 z-40 transition-all duration-300 isolation-auto ";
 
     // Si debe ser transparente al inicio y no se ha hecho scroll
     if (transparentOnTop && !scrolled) {
-      classes += "bg-transparent "
+      classes += "bg-transparent ";
     } else {
       // Si es variante oscura (texto blanco)
       if (variant === "dark") {
         // Use CSS variable for backdrop-filter to prevent it from creating a stacking context that's too aggressive
-        classes += "bg-black/30 backdrop-blur-md "
+        classes += "bg-black/30 backdrop-blur-md ";
       }
       // Si es variante clara (texto oscuro)
       else {
-        classes += "bg-white/70 backdrop-blur-md shadow-sm "
+        classes += "bg-white/70 backdrop-blur-md shadow-sm ";
       }
     }
 
-    return classes
-  }
+    return classes;
+  };
 
   // Determinar el color del texto basado en la variante
-  const textColor = variant === "dark" ? "text-white" : "text-gray-800"
-  const hoverTextColor = variant === "dark" ? "hover:text-gray-300" : "hover:text-gray-600"
+  const textColor = variant === "dark" ? "text-white" : "text-gray-800";
+  const hoverTextColor =
+    variant === "dark" ? "hover:text-gray-300" : "hover:text-gray-600";
   const buttonBgColor =
-    variant === "dark" ? "bg-white text-black hover:bg-gray-200" : "bg-black text-white hover:bg-gray-800"
+    variant === "dark"
+      ? "bg-white text-black hover:bg-gray-200"
+      : "bg-black text-white hover:bg-gray-800";
 
   // Determinar qué logo usar basado en la variante
-  const logoSrc = variant === "dark" ? "/images/logo-white.png" : "/images/logo-dark.png"
+  const logoSrc =
+    variant === "dark" ? "/images/logo-white.png" : "/images/logo-dark.png";
+
+  if (!isLoaded) {
+    return (
+      <header className={getNavbarClasses()}>
+        <nav className="flex justify-between items-center max-w-7xl mx-auto">
+          <Link href={`/${currentLang}`} className="flex items-center">
+            <div className="relative h-10 w-40">
+              <Image
+                src={logoSrc}
+                alt="TUDO Logo"
+                fill
+                style={{ objectFit: "contain", objectPosition: "left" }}
+                priority
+              />
+            </div>
+          </Link>
+          {/* Loading skeleton */}
+          <div className="hidden md:flex items-center space-x-8">
+            <div className="w-20 h-4 bg-gray-200 animate-pulse rounded"></div>
+            <div className="w-20 h-4 bg-gray-200 animate-pulse rounded"></div>
+            <div className="w-20 h-4 bg-gray-200 animate-pulse rounded"></div>
+            <div className="w-24 h-8 bg-gray-200 animate-pulse rounded"></div>
+          </div>
+          <MobileMenu
+            lang={currentLang}
+            dictionary={navDict}
+            variant={variant}
+          />
+        </nav>
+      </header>
+    );
+  }
 
   return (
     <header className={getNavbarClasses()}>
@@ -108,31 +158,81 @@ export default function Navbar({
           </div>
         </Link>
         <div className="hidden md:flex items-center space-x-8">
-          <Link href={`/${currentLang}/search`} className={`${textColor} ${hoverTextColor} transition-colors`}>
+          <Link
+            href={`/${currentLang}/search`}
+            className={`${textColor} ${hoverTextColor} transition-colors`}
+          >
             {navDict.searchClasses}
           </Link>
-          <Link href={`/${currentLang}/pricing`} className={`${textColor} ${hoverTextColor} transition-colors`}>
+          <Link
+            href={`/${currentLang}/pricing`}
+            className={`${textColor} ${hoverTextColor} transition-colors`}
+          >
             {navDict.pricing}
           </Link>
-          <Link href={`/${currentLang}/about`} className={`${textColor} ${hoverTextColor} transition-colors`}>
+          <Link
+            href={`/${currentLang}/about`}
+            className={`${textColor} ${hoverTextColor} transition-colors`}
+          >
             {navDict.about}
           </Link>
-          <Link href={`/${currentLang}/business`} className={`${textColor} ${hoverTextColor} transition-colors`}>
+          <Link
+            href={`/${currentLang}/business`}
+            className={`${textColor} ${hoverTextColor} transition-colors`}
+          >
             {navDict.business}
           </Link>
           <LanguageSwitcher currentLang={currentLang} variant={variant} />
-          <Link href={`/${currentLang}/login`} className={`${textColor} ${hoverTextColor} transition-colors`}>
-            {navDict.login}
-          </Link>
-          <Link
-            href={`/${currentLang}/signup`}
-            className={`${buttonBgColor} px-4 py-2 rounded-md transition-colors flex items-center justify-center h-9`}
-          >
-            {navDict.signup}
-          </Link>
+
+          {isSignedIn ? (
+            <div className="flex items-center space-x-4">
+              {/* Mensaje de bienvenida opcional */}
+              {user?.firstName && (
+                <span className={`${textColor} hidden lg:block`}>
+                  {navDict.hello?.replace("{name}", user.firstName) ||
+                    `Hello, ${user.firstName}!`}
+                </span>
+              )}
+              <UserButton
+                afterSignOutUrl={`/${currentLang}`}
+                appearance={{
+                  elements: {
+                    avatarBox: "h-9 w-9",
+                    userButtonBox: "h-9 w-9",
+                    userButtonPopoverCard: "z-[9999]",
+                    userButtonPopoverActions: "z-[9999]",
+                    userPreviewMainIdentifier:
+                      variant === "dark" ? "text-white" : "text-gray-800",
+                    userPreviewSecondaryIdentifier:
+                      variant === "dark" ? "text-gray-300" : "text-gray-500",
+                  },
+                  variables: {
+                    colorPrimary: "#FF9422", // Tu color primario
+                  },
+                }}
+                userProfileMode="modal" // Cambio principal aquí
+                showName={false} // Opcional: mostrar el nombre en el botón
+              />
+            </div>
+          ) : (
+            <>
+              <Link
+                href={`/${currentLang}/login`}
+                className={`${textColor} ${hoverTextColor} transition-colors`}
+              >
+                {navDict.login}
+              </Link>
+              <Link
+                href={`/${currentLang}/signup`}
+                className={`${buttonBgColor} px-4 py-2 rounded-md transition-colors flex items-center justify-center h-9`}
+              >
+                {navDict.signup}
+              </Link>
+            </>
+          )}
         </div>
         <MobileMenu lang={currentLang} dictionary={navDict} variant={variant} />
       </nav>
     </header>
-  )
+  );
 }

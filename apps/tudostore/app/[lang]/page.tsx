@@ -9,10 +9,11 @@ import { Footer } from "@/components/Footer";
 import type { Locale } from "@/middleware";
 
 export default async function Home({
-  params: { lang },
+  params,
 }: {
-  params: { lang: Locale };
+  params: Promise<{ lang: Locale }>;
 }) {
+  const { lang } = await params;
   const dict = await getDictionary(lang);
 
   return (

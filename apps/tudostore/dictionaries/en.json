@@ -255,7 +255,8 @@
     "about": "About",
     "login": "Log in",
     "signup": "Sign up",
-    "business": "Business"
+    "business": "Business",
+    "hello": "Hello, {name}!"
   },
   "hero": {
     "title": "Your all-access pass to fitness, wellness & beauty",

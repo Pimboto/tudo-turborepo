@@ -1,13 +1,17 @@
-//app\[lang]\layout.tsx
+// app/[lang]/layout.tsx
 import type React from "react"
 import "../globals.css"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { locales } from "@/middleware"
+import { ClerkProvider } from '@clerk/nextjs'
+import MultisessionAppSupport from "@/components/MultisessionAppSupport"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export async function generateMetadata({ params }: { params: { lang: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+  const { lang } = await params;
+  
   return {
     title: "TUDO - No strings. just joy.",
     description: "Your all-access pass to fitness, wellness & beauty",
@@ -27,16 +31,35 @@ export async function generateStaticParams() {
   return locales.map((lang) => ({ lang }))
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
   params,
 }: {
   children: React.ReactNode
-  params: { lang: string }
+  params: Promise<{ lang: string }>
 }) {
+  const { lang } = await params;
+  
+  console.log("🔧 Layout rendering with lang:", lang);
+  console.log("🔑 Clerk keys check:", {
+    publishable: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? "✅ Set" : "❌ Missing",
+    secret: process.env.CLERK_SECRET_KEY ? "✅ Set" : "❌ Missing"
+  });
+  
   return (
-    <html lang={params.lang} suppressHydrationWarning>
-      <body className={inter.className}>{children}</body>
+    <html lang={lang} suppressHydrationWarning>
+      <body className={inter.className}>
+        <ClerkProvider
+          afterMultiSessionSingleSignOutUrl={`/${lang}`}
+          appearance={{
+            // Add supported appearance options here if needed
+          }}
+        >
+          <MultisessionAppSupport>
+            {children}
+          </MultisessionAppSupport>
+        </ClerkProvider>
+      </body>
     </html>
   )
 }

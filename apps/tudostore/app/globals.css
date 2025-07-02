@@ -303,3 +303,21 @@ video {
 [role="menu"] {
   z-index: 9999 !important;
 }
+
+
+
+/* Asegurar que los popups del UserButton aparezcan arriba del navbar */
+.cl-userButton-popover {
+  z-index: 9999 !important;
+}
+
+.cl-userButtonPopoverRootBox *,
+.cl-userButtonPopoverCard * {
+  color: #333 !important;
+}
+
+.cl-userButtonPopoverCard .cl-userPreview .cl-userPreviewTextContainer span {
+  color: #333 !important;
+  opacity: 1 !important;
+}
+

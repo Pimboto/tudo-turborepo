@@ -252,6 +252,9 @@ importers:
 
   apps/tudostore:
     dependencies:
+      '@clerk/nextjs':
+        specifier: ^6.19.2
+        version: 6.23.2(next@15.2.4)(react-dom@19.1.0)(react@19.1.0)
       '@formatjs/intl-localematcher':
         specifier: latest
         version: 0.6.1
@@ -1303,6 +1306,34 @@ packages:
       - react-dom
     dev: false
 
+  /@clerk/backend@2.3.1(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-T4Ug8R3PtLUkG/5YWZXB9NpgmgqPnVOloINnlWUJPH323sFHz2AAOhfx6r/li/fpQ99Xn3oaqTOmVYlMy0AIsA==}
+    engines: {node: '>=18.17.0'}
+    dependencies:
+      '@clerk/shared': 3.10.1(react-dom@19.1.0)(react@19.1.0)
+      '@clerk/types': 4.62.1
+      cookie: 1.0.2
+      snakecase-keys: 8.0.1
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - react
+      - react-dom
+    dev: false
+
+  /@clerk/clerk-react@5.32.3(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-u+D/2G6DFK+UoiVVGblkhBFygxZs4lzYyT0MxJdNIzhbWyFM2bcKPRoWrf0cl8Rj2VAXVlLsA0hN/a512bOzjg==}
+    engines: {node: '>=18.17.0'}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0 || ^19.0.0-0
+      react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-0
+    dependencies:
+      '@clerk/shared': 3.10.1(react-dom@19.1.0)(react@19.1.0)
+      '@clerk/types': 4.62.1
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+      tslib: 2.8.1
+    dev: false
+
   /@clerk/clerk-sdk-node@5.1.6(react@18.3.1):
     resolution: {integrity: sha512-KeF5p0XP0gNoCx+YIHrfrkNNADBz8ZabwPAhOiJZ9Wo14r93WlzRA51IE0Qgteej8IpWwnvKu4/MpiV7FFoLqA==}
     engines: {node: '>=18.17.0'}
@@ -1335,6 +1366,25 @@ packages:
       - svix
     dev: false
 
+  /@clerk/nextjs@6.23.2(next@15.2.4)(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-7Jh+rVLYA90YkFEExLzbMU2hvZwAWBRpIhHJE+mHBhUmOrwqxTqs42zizYIN6qXxyMaN+GLw4x/FdI532JTzxA==}
+    engines: {node: '>=18.17.0'}
+    peerDependencies:
+      next: ^13.5.7 || ^14.2.25 || ^15.2.3
+      react: ^18.0.0 || ^19.0.0 || ^19.0.0-0
+      react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-0
+    dependencies:
+      '@clerk/backend': 2.3.1(react-dom@19.1.0)(react@19.1.0)
+      '@clerk/clerk-react': 5.32.3(react-dom@19.1.0)(react@19.1.0)
+      '@clerk/shared': 3.10.1(react-dom@19.1.0)(react@19.1.0)
+      '@clerk/types': 4.62.1
+      next: 15.2.4(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+      server-only: 0.0.1
+      tslib: 2.8.1
+    dev: false
+
   /@clerk/shared@2.22.0(react@18.3.1):
     resolution: {integrity: sha512-VWBeddOJVa3sqUPdvquaaQYw4h5hACSG3EUDOW7eSu2F6W3BXUozyLJQPBJ9C0MuoeHhOe/DeV8x2KqOgxVZaQ==}
     engines: {node: '>=18.17.0'}
@@ -1355,6 +1405,29 @@ packages:
       react: 18.3.1
       std-env: 3.9.0
       swr: 2.2.0(react@18.3.1)
+    dev: false
+
+  /@clerk/shared@3.10.1(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-V3MFEja75qcH7MHdZ8OUo+ndQK+ivGcIQHSeDpnIAvVRXWjYy8JDpS/tYwt81FW8hgq/WcxT1rpEd27XUKrrNg==}
+    engines: {node: '>=18.17.0'}
+    requiresBuild: true
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0 || ^19.0.0-0
+      react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-0
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+    dependencies:
+      '@clerk/types': 4.62.1
+      dequal: 2.0.3
+      glob-to-regexp: 0.4.1
+      js-cookie: 3.0.5
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+      std-env: 3.9.0
+      swr: 2.3.3(react@19.1.0)
     dev: false
 
   /@clerk/shared@3.9.3(react@18.3.1):
@@ -1410,6 +1483,13 @@ packages:
 
   /@clerk/types@4.59.2:
     resolution: {integrity: sha512-PO16hwdpwnZZMJu5BN69v8gqBnK5mfJkcHK3k5XymsPG9t+rply2K5fyP43+HoNkxluufk6SObDmY9NTzd+lKw==}
+    engines: {node: '>=18.17.0'}
+    dependencies:
+      csstype: 3.1.3
+    dev: false
+
+  /@clerk/types@4.62.1:
+    resolution: {integrity: sha512-qr0HrlM+VS/QEqjRP+1qSp2ipi+MrGGs/ih+HDqe0d/egfobFGGOg0Z759ZBE6Nd5WHWVTWWuFiilnfhJ8QqdQ==}
     engines: {node: '>=18.17.0'}
     dependencies:
       csstype: 3.1.3
@@ -11725,6 +11805,16 @@ packages:
       dequal: 2.0.3
       react: 18.3.1
       use-sync-external-store: 1.5.0(react@18.3.1)
+    dev: false
+
+  /swr@2.3.3(react@19.1.0):
+    resolution: {integrity: sha512-dshNvs3ExOqtZ6kJBaAsabhPdHyeY4P2cKwRCniDVifBMoG/SVI7tfLWqPXriVspf2Rg4tPzXJTnwaihIeFw2A==}
+    peerDependencies:
+      react: ^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    dependencies:
+      dequal: 2.0.3
+      react: 19.1.0
+      use-sync-external-store: 1.5.0(react@19.1.0)
     dev: false
 
   /symbol-tree@3.2.4:

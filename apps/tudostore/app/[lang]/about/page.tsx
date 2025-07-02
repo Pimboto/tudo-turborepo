@@ -11,9 +11,10 @@ import { Footer } from "@/components/Footer"
 export async function generateMetadata({ 
   params 
 }: { 
-  params: { lang: Locale } 
+  params: Promise<{ lang: Locale }> 
 }): Promise<Metadata> {
-  const dict = await getDictionary(params.lang)
+  const { lang } = await params;
+  const dict = await getDictionary(lang)
 
   // Agregamos verificación de seguridad
   return {
@@ -25,10 +26,10 @@ export async function generateMetadata({
 export default async function AboutPage({ 
   params 
 }: { 
-  params: { lang: Locale } 
+  params: Promise<{ lang: Locale }> 
 }) {
-  // Correctamente esperamos el valor de lang desde params
-  const dict = await getDictionary(params.lang)
+  const { lang } = await params;
+  const dict = await getDictionary(lang)
   
   // Verificamos que dict tenga la estructura correcta
   const defaultDict = {
@@ -47,17 +48,13 @@ export default async function AboutPage({
 
       {/* Contenido de la página */}
       <div className="relative z-10">
-        <Navbar lang={params.lang} dictionary={dict?.navbar || {}} variant="light" transparentOnTop={true} />
+        <Navbar lang={lang} dictionary={dict?.navbar || {}} variant="light" transparentOnTop={true} />
         <MadeToMoveSection dictionary={aboutDict.madeToMove} />
         <NoStringsSection dictionary={aboutDict.noStrings} />
         <MakeItHappenSection dictionary={aboutDict.makeItHappen} />
-        <Footer dictionary={dict.footer} lang={params.lang} />
+        <Footer dictionary={dict.footer} lang={lang} />
       </div>
-
-
-      {/* Footer */}
     </main>
-
   )
 }
 

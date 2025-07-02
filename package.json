@@ -1,5 +1,5 @@
 {
-  "name": "kitchen-sink",
+  "name": "TUDO",
   "private": true,
   "scripts": {
     "build": "turbo run build",
