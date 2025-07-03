@@ -1,145 +1,154 @@
 // app/[lang]/sso-callback/page.tsx
-'use client'
+"use client";
 
-import React, { useEffect, useState } from 'react'
-import {
-  AuthenticateWithRedirectCallback,
-  useSignIn,
-  useSignUp,
-  useClerk,
-} from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, use } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
+import Image from "next/image";
+import { useApiWithAuth } from "@/lib/api";
+import type { Locale } from "@/middleware";
+import { CheckCircle, AlertCircle } from "lucide-react";
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from '@/components/ui/card'
+interface SSOCallbackProps {
+  params: Promise<{ lang: Locale }>;
+}
 
-export default function SSOCallbackPage() {
-  const router = useRouter()
+export default function SSOCallback({ params }: SSOCallbackProps) {
+  const { lang } = use(params);
+  const router = useRouter();
+  const { user, isLoaded, isSignedIn } = useUser();
+  
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [error, setError] = useState("");
 
-  /* Clerk hooks ----------------------------------------------------------- */
-  const { signUp, isLoaded: signUpLoaded } = useSignUp()
-  const { signIn, isLoaded: signInLoaded } = useSignIn()
-  const { setActive } = useClerk() // <-- setActive para multi-session
-
-  /* State ----------------------------------------------------------------- */
-  const [showUsernameForm, setShowUsernameForm] = useState(false)
-  const [username, setUsername] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-
-  // Obtener el idioma actual de la URL
-  const lang = typeof window !== 'undefined' 
-    ? window.location.pathname.split('/')[1] || 'en'
-    : 'en'
-
-  /* 1.  Inicio de sesión con cuenta EXISTENTE ----------------------------- */
   useEffect(() => {
-    if (!signInLoaded) return
-    if (signIn?.status === 'complete' && signIn.createdSessionId) {
-      setActive({ session: signIn.createdSessionId }) // activa la nueva sesión
-      router.replace(`/${lang}`)
-    }
-  }, [signInLoaded, signIn, setActive, router, lang])
+    if (!isLoaded) return;
+    
+    // Avoid infinite loop by only running once when conditions are met
+    if (status !== 'loading') return;
 
-  /* 2.  Registro nuevo (faltan datos) o completado ------------------------ */
-  useEffect(() => {
-    if (!signUpLoaded) return
-
-    // Falta username ⇒ mostramos formulario
-    if (
-      signUp?.status === 'missing_requirements' &&
-      signUp.missingFields?.includes('username')
-    ) {
-      setShowUsernameForm(true)
-      return
-    }
-
-    // Registro completo ⇒ activamos sesión y redirigimos
-    if (signUp?.status === 'complete' && signUp.createdSessionId) {
-      setActive({ session: signUp.createdSessionId }) // activa la nueva sesión
-      router.replace(`/${lang}`)
-    }
-  }, [signUpLoaded, signUp, setActive, router, lang])
-
-  /* 3.  Enviar username pendiente ---------------------------------------- */
-  const handleUsernameSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    try {
-      const updated = await signUp?.update({ username })
-
-      if (updated?.status === 'complete' && updated.createdSessionId) {
-        await setActive({ session: updated.createdSessionId })
-        router.replace(`/${lang}`)
-      } else if (updated?.status === 'missing_requirements') {
-        setError('El nombre de usuario no es válido.')
+    const handleRedirect = () => {
+      if (!isSignedIn || !user) {
+        setStatus('error');
+        setError('Authentication failed. Please try again.');
+        return;
       }
-    } catch (err: any) {
-      setError(err?.errors?.[0]?.message ?? 'Error al completar el registro')
-    } finally {
-      setLoading(false)
-    }
-  }
 
-  /* 4.  UI: formulario de username pendiente ------------------------------ */
-  if (showUsernameForm) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center">
-              Completa tu cuenta
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleUsernameSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="username" className="text-sm font-medium">
-                  Nombre de usuario
-                </label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="Ingresa tu username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-                {error && (
-                  <p className="text-sm text-red-600">{error}</p>
-                )}
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Creando cuenta…' : 'Completar registro'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
+      try {
+        setStatus('success');
+        
+        // Simple redirect - let onboarding handle all the backend sync
+        setTimeout(() => {
+          router.push(`/${lang}/onboarding/preferences`);
+        }, 1000);
+      } catch (err) {
+        console.error('SSO Redirect error:', err);
+        setStatus('error');
+        setError('Something went wrong. Please try again.');
+      }
+    };
 
-  /* 5.  Spinner + callback mientras Clerk procesa ------------------------ */
+    // Simple redirect once everything is loaded
+    handleRedirect();
+  }, [isLoaded, isSignedIn, user, status, router, lang]);
+
+  const handleRetry = () => {
+    setStatus('loading');
+    setError("");
+    // Simple page refresh to restart the process
+    window.location.reload();
+  };
+
+  const handleGoHome = () => {
+    router.push(`/${lang}`);
+  };
+
   return (
-    <div className="h-screen flex flex-col items-center justify-center">
-      <h1 className="text-lg font-medium">
-        Completando inicio de sesión…
-      </h1>
-      <p className="text-sm text-gray-500 mt-2">Por favor espera</p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full p-8">
+        <div className="text-center space-y-6">
+          {/* Logo */}
+          <div className="flex justify-center">
+            <div className="relative h-12 w-48">
+              <Image
+                src="/images/tudo-logo.png"
+                alt="TUDO Logo"
+                fill
+                style={{ objectFit: "contain" }}
+              />
+            </div>
+          </div>
 
-      <AuthenticateWithRedirectCallback
-        redirectUrl={`/${lang}`}
-        afterSignInUrl={`/${lang}`}
-        afterSignUpUrl={`/${lang}`}
-      />
+          {/* Status Content */}
+          {status === 'loading' && (
+            <>
+              <div className="flex justify-center">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+              <div>
+                <h1 className="text-xl font-heading text-gray-900 mb-2">
+                  Completing sign up...
+                </h1>
+                <p className="text-gray-600">
+                  Please wait while we set up your account.
+                </p>
+              </div>
+            </>
+          )}
+
+
+
+          {status === 'success' && (
+            <>
+              <div className="flex justify-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-8 h-8 text-green-600" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-xl font-heading text-gray-900 mb-2">
+                  Welcome to TUDO Fitness!
+                </h1>
+                <p className="text-gray-600">
+                  Your account has been successfully created. Redirecting...
+                </p>
+              </div>
+            </>
+          )}
+
+          {status === 'error' && (
+            <>
+              <div className="flex justify-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                  <AlertCircle className="w-8 h-8 text-red-600" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-xl font-heading text-gray-900 mb-2">
+                  Something went wrong
+                </h1>
+                <p className="text-gray-600 mb-4">
+                  {error || "We couldn't complete your sign up. Please try again."}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <button
+                    onClick={handleRetry}
+                    className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    Try Again
+                  </button>
+                  <button
+                    onClick={handleGoHome}
+                    className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Go to Home
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
-  )
+  );
 }
