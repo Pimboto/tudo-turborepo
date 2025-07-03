@@ -18,7 +18,12 @@ export const attachUserData = async (
     const { userId: clerkId } = getAuth(req);
     
     if (!clerkId) {
-      throw new AppError(401, 'No authenticated user');
+      res.status(401).json({ 
+        success: false, 
+        error: 'No authenticated user',
+        code: 'NO_AUTH'
+      });
+      return;
     }
 
     // Get user from database
@@ -34,8 +39,14 @@ export const attachUserData = async (
 
     if (!user) {
       // User exists in Clerk but not in our database
-      // This shouldn't happen in normal flow
-      throw new AppError(401, 'User not found in database');
+      // Return 403 with specific error code
+      res.status(403).json({ 
+        success: false, 
+        error: 'User not registered. Please complete registration first.',
+        code: 'USER_NOT_REGISTERED',
+        needsRegistration: true
+      });
+      return;
     }
 
     // Attach user to request

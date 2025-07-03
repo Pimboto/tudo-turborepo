@@ -25,6 +25,20 @@ export function CreditsDisplay({ variant = "dark" }: CreditsDisplayProps) {
     }
   }, [isLoaded, user]);
 
+  // Escuchar eventos de actualización de créditos
+  useEffect(() => {
+    const handleCreditsUpdate = () => {
+      console.log('Credits update event received');
+      fetchCredits();
+    };
+
+    window.addEventListener('credits-updated', handleCreditsUpdate);
+    
+    return () => {
+      window.removeEventListener('credits-updated', handleCreditsUpdate);
+    };
+  }, []);
+
   const fetchCredits = async () => {
     try {
       const token = await getToken();

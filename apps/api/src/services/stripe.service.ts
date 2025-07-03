@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable turbo/no-undeclared-env-vars */
 // apps/api/src/services/stripe.service.ts
-import Stripe from 'stripe';
-import { prisma } from '../prisma/client';
-import { AppError } from '../middleware/errorHandler';
+import Stripe from "stripe";
+import { prisma } from "../prisma/client";
+import { AppError } from "../middleware/errorHandler";
 
 // Inicializar Stripe con la clave secreta
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-05-28.basil', // Versión más reciente de la API
+  apiVersion: "2025-05-28.basil", // Versión más reciente de la API
 });
 
 export class StripeService {
@@ -18,7 +18,7 @@ export class StripeService {
     try {
       // Validar entrada
       if (credits <= 0 || credits > 10000) {
-        throw new AppError(400, 'Credit amount must be between 1 and 10000');
+        throw new AppError(400, "Credit amount must be between 1 and 10000");
       }
 
       // Obtener usuario para verificar que existe
@@ -28,7 +28,7 @@ export class StripeService {
       });
 
       if (!user) {
-        throw new AppError(404, 'User not found');
+        throw new AppError(404, "User not found");
       }
 
       // Calcular precio (ejemplo: 1 crédito = $1.00 USD)
@@ -37,17 +37,17 @@ export class StripeService {
 
       // Crear sesión de Stripe Checkout
       const session = await stripe.checkout.sessions.create({
-        mode: 'payment',
-        payment_method_types: ['card'],
+        mode: "payment",
+        payment_method_types: ["card"],
         line_items: [
           {
             price_data: {
-              currency: 'usd',
+              currency: "usd",
               unit_amount: unitAmount,
               product_data: {
-                name: 'Tudo Fitness Credits',
+                name: "Tudo Fitness Credits",
                 description: `${credits} fitness credits for booking classes`,
-                images: ['https://example.com/credits-image.jpg'], // Opcional
+                images: ["https://example.com/credits-image.jpg"], // Opcional
               },
             },
             quantity: credits,
@@ -58,11 +58,9 @@ export class StripeService {
         metadata: {
           userId,
           credits: credits.toString(),
-          type: 'credit_purchase',
+          type: "credit_purchase",
         },
         customer_email: user.email,
-        // Opcional: crear customer en Stripe
-        // customer_creation: 'always',
       });
 
       // Crear registro de compra en estado PENDING
@@ -72,10 +70,10 @@ export class StripeService {
           amount: credits, // Monto en dólares
           credits,
           stripeSessionId: session.id,
-          status: 'PENDING',
+          status: "PENDING",
           metadata: {
             sessionUrl: session.url,
-            unitPrice: 1.00,
+            unitPrice: 1.0,
           },
         },
       });
@@ -87,24 +85,26 @@ export class StripeService {
         credits,
       };
     } catch (error) {
-      console.error('Error creating Stripe checkout session:', error);
+      console.error("Error creating Stripe checkout session:", error);
       if (error instanceof AppError) {
         throw error;
       }
-      throw new AppError(500, 'Failed to create checkout session');
+      throw new AppError(500, "Failed to create checkout session");
     }
   }
 
   /**
    * Procesa webhook de checkout.session.completed
    */
-  static async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+  static async handleCheckoutSessionCompleted(
+    session: Stripe.Checkout.Session
+  ) {
     try {
       const userId = session.metadata?.userId;
-      const credits = parseInt(session.metadata?.credits || '0');
+      const credits = parseInt(session.metadata?.credits || "0");
 
       if (!userId || !credits) {
-        throw new AppError(400, 'Invalid session metadata');
+        throw new AppError(400, "Invalid session metadata");
       }
 
       // Verificar que la sesión no haya sido procesada antes
@@ -117,7 +117,7 @@ export class StripeService {
         return;
       }
 
-      if (existingPurchase.status === 'COMPLETED') {
+      if (existingPurchase.status === "COMPLETED") {
         console.log(`Purchase already completed: ${session.id}`);
         return;
       }
@@ -128,10 +128,10 @@ export class StripeService {
         prisma.purchase.update({
           where: { stripeSessionId: session.id },
           data: {
-            status: 'COMPLETED',
+            status: "COMPLETED",
             stripePaymentIntentId: session.payment_intent as string,
             metadata: {
-              ...existingPurchase.metadata as object,
+              ...(existingPurchase.metadata as object),
               completedAt: new Date().toISOString(),
               amountReceived: session.amount_total,
             },
@@ -148,27 +148,29 @@ export class StripeService {
         prisma.notification.create({
           data: {
             userId,
-            type: 'CREDITS_PURCHASED',
-            title: 'Credits Added!',
+            type: "CREDITS_PURCHASED",
+            title: "Credits Added!",
             body: `You've successfully purchased ${credits} credits. Happy booking!`,
           },
         }),
       ]);
 
-      console.log(`Successfully processed credit purchase for user ${userId}: ${credits} credits`);
+      console.log(
+        `Successfully processed credit purchase for user ${userId}: ${credits} credits`
+      );
     } catch (error) {
-      console.error('Error processing checkout session completed:', error);
-      
+      console.error("Error processing checkout session completed:", error);
+
       // Marcar purchase como fallida si existe
       try {
         await prisma.purchase.updateMany({
           where: { stripeSessionId: session.id },
-          data: { status: 'FAILED' },
+          data: { status: "FAILED" },
         });
       } catch (updateError) {
-        console.error('Error updating purchase to failed:', updateError);
+        console.error("Error updating purchase to failed:", updateError);
       }
-      
+
       throw error;
     }
   }
@@ -187,10 +189,11 @@ export class StripeService {
         await prisma.purchase.update({
           where: { id: purchase.id },
           data: {
-            status: 'FAILED',
+            status: "FAILED",
             metadata: {
-              ...purchase.metadata as object,
-              failureReason: paymentIntent.last_payment_error?.message || 'Payment failed',
+              ...(purchase.metadata as object),
+              failureReason:
+                paymentIntent.last_payment_error?.message || "Payment failed",
               failedAt: new Date().toISOString(),
             },
           },
@@ -200,14 +203,14 @@ export class StripeService {
         await prisma.notification.create({
           data: {
             userId: purchase.userId,
-            type: 'PAYMENT_FAILED',
-            title: 'Payment Failed',
-            body: 'Your credit purchase could not be processed. Please try again.',
+            type: "PAYMENT_FAILED",
+            title: "Payment Failed",
+            body: "Your credit purchase could not be processed. Please try again.",
           },
         });
       }
     } catch (error) {
-      console.error('Error handling payment failed:', error);
+      console.error("Error handling payment failed:", error);
       throw error;
     }
   }
@@ -220,8 +223,8 @@ export class StripeService {
       const session = await stripe.checkout.sessions.retrieve(sessionId);
       return session;
     } catch (error) {
-      console.error('Error retrieving Stripe session:', error);
-      throw new AppError(404, 'Session not found');
+      console.error("Error retrieving Stripe session:", error);
+      throw new AppError(404, "Session not found");
     }
   }
 
@@ -235,20 +238,20 @@ export class StripeService {
       });
 
       if (!purchase || !purchase.stripePaymentIntentId) {
-        throw new AppError(404, 'Purchase not found or no payment intent');
+        throw new AppError(404, "Purchase not found or no payment intent");
       }
 
-      if (purchase.status !== 'COMPLETED') {
-        throw new AppError(400, 'Can only refund completed purchases');
+      if (purchase.status !== "COMPLETED") {
+        throw new AppError(400, "Can only refund completed purchases");
       }
 
       // Crear refund en Stripe
       const refund = await stripe.refunds.create({
         payment_intent: purchase.stripePaymentIntentId,
-        reason: 'requested_by_customer',
+        reason: "requested_by_customer",
         metadata: {
           purchaseId,
-          reason: reason || 'Customer request',
+          reason: reason || "Customer request",
         },
       });
 
@@ -257,9 +260,9 @@ export class StripeService {
         prisma.purchase.update({
           where: { id: purchaseId },
           data: {
-            status: 'REFUNDED',
+            status: "REFUNDED",
             metadata: {
-              ...purchase.metadata as object,
+              ...(purchase.metadata as object),
               refundId: refund.id,
               refundedAt: new Date().toISOString(),
               refundReason: reason,
@@ -275,8 +278,8 @@ export class StripeService {
         prisma.notification.create({
           data: {
             userId: purchase.userId,
-            type: 'REFUND_PROCESSED',
-            title: 'Refund Processed',
+            type: "REFUND_PROCESSED",
+            title: "Refund Processed",
             body: `Your purchase of ${purchase.credits} credits has been refunded.`,
           },
         }),
@@ -284,11 +287,11 @@ export class StripeService {
 
       return refund;
     } catch (error) {
-      console.error('Error processing refund:', error);
+      console.error("Error processing refund:", error);
       if (error instanceof AppError) {
         throw error;
       }
-      throw new AppError(500, 'Failed to process refund');
+      throw new AppError(500, "Failed to process refund");
     }
   }
 
@@ -298,15 +301,32 @@ export class StripeService {
   static constructWebhookEvent(body: string | Buffer, signature: string) {
     try {
       const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+      console.log("🔐 Webhook validation:", {
+        hasSecret: !!webhookSecret,
+        secretLength: webhookSecret?.length,
+        signatureLength: signature?.length,
+        bodyType: typeof body,
+        bodyLength: body?.length || 0,
+      });
+
       if (!webhookSecret) {
-        throw new AppError(500, 'Webhook secret not configured');
+        throw new AppError(500, "Webhook secret not configured");
       }
 
-      const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      const event = stripe.webhooks.constructEvent(
+        body,
+        signature,
+        webhookSecret
+      );
+      console.log("✅ Webhook event validated:", event.type);
       return event;
     } catch (error) {
-      console.error('Webhook signature verification failed:', error);
-      throw new AppError(400, 'Invalid webhook signature');
+      console.error("❌ Webhook signature verification failed:", error);
+      if (error instanceof Error) {
+        console.error("Error details:", error.message);
+      }
+      throw new AppError(400, "Invalid webhook signature");
     }
   }
 
@@ -325,11 +345,14 @@ export class StripeService {
       });
     } catch (error) {
       // Si el evento ya existe (unique constraint), no es un error
-      if (error instanceof Error && error.message.includes('unique constraint')) {
+      if (
+        error instanceof Error &&
+        error.message.includes("unique constraint")
+      ) {
         console.log(`Webhook event ${event.id} already exists, skipping save`);
         return;
       }
-      console.error('Error saving webhook event:', error);
+      console.error("Error saving webhook event:", error);
       throw error;
     }
   }
@@ -347,7 +370,7 @@ export class StripeService {
         },
       });
     } catch (updateError) {
-      console.error('Error marking webhook event as processed:', updateError);
+      console.error("Error marking webhook event as processed:", updateError);
     }
   }
 }

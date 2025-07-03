@@ -20,9 +20,9 @@ export class PaymentService {
         throw new AppError(404, 'User not found');
       }
 
-      if (!user.verified) {
+      /* if (!user.verified) {
         throw new AppError(403, 'Account must be verified to purchase credits');
-      }
+      } */
 
       // Validar cantidad de créditos
       const { credits } = data;

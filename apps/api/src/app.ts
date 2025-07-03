@@ -35,11 +35,24 @@ export const createApp = (): Express => {
     allowedHeaders: ['Content-Type', 'Authorization'],
   }));
   
-  // Request parsing (before Clerk middleware)
-  app.use(bodyParser.json({ limit: '10mb' }));
-  app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
-
-
+  // Request parsing - EXCLUIR WEBHOOK DE STRIPE
+  app.use((req, res, next) => {
+    // Skip body parsing for Stripe webhook
+    if (req.originalUrl === '/api/payments/webhook/stripe') {
+      next();
+    } else {
+      bodyParser.json({ limit: '10mb' })(req, res, next);
+    }
+  });
+  
+  app.use((req, res, next) => {
+    // Skip body parsing for Stripe webhook
+    if (req.originalUrl === '/api/payments/webhook/stripe') {
+      next();
+    } else {
+      bodyParser.urlencoded({ extended: true, limit: '10mb' })(req, res, next);
+    }
+  });
 
   // Clerk middleware configuration
   const clerkConfig: any = {
@@ -121,17 +134,6 @@ export const createApp = (): Express => {
 
   // API routes
   app.use('/api', routes);
-
-  // Clerk webhooks endpoint (if needed)
-  app.post('/api/webhooks/clerk', express.raw({ type: 'application/json' }), async (req, res) => {
-    try {
-      // Handle Clerk webhooks here
-      // You'll need to verify the webhook signature
-      res.json({ received: true });
-    } catch (error) {
-      res.status(400).json({ error: 'Webhook error' });
-    }
-  });
 
   // 404 handler
   app.use((req, res) => {

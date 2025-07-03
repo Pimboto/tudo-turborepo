@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Coins, Sparkles, TrendingUp, Star } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Coins, Sparkles, TrendingUp, Star, AlertCircle } from "lucide-react";
 import { useUser, useAuth } from "@clerk/nextjs";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -36,7 +37,12 @@ interface CreditPackage {
   description: string;
 }
 
-export function CreditsModal({ isOpen, onClose, currentCredits, onSuccess }: CreditsModalProps) {
+export function CreditsModal({
+  isOpen,
+  onClose,
+  currentCredits,
+  onSuccess,
+}: CreditsModalProps) {
   const { user } = useUser();
   const { getToken } = useAuth();
   const router = useRouter();
@@ -44,6 +50,10 @@ export function CreditsModal({ isOpen, onClose, currentCredits, onSuccess }: Cre
   const [loading, setLoading] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Extract language from pathname
+  const lang = pathname.split("/")[1] || "en";
 
   // Paquetes predefinidos
   const packages: CreditPackage[] = [
@@ -51,16 +61,16 @@ export function CreditsModal({ isOpen, onClose, currentCredits, onSuccess }: Cre
       id: "basic",
       name: "Basic Pack",
       credits: 10,
-      price: 10.00,
-      pricePerCredit: 1.00,
+      price: 10.0,
+      pricePerCredit: 1.0,
       description: "Perfect for trying out",
     },
     {
       id: "standard",
       name: "Standard Pack",
       credits: 50,
-      price: 45.00,
-      pricePerCredit: 0.90,
+      price: 45.0,
+      pricePerCredit: 0.9,
       popular: true,
       savings: "Save 10%",
       description: "Most popular choice",
@@ -69,8 +79,8 @@ export function CreditsModal({ isOpen, onClose, currentCredits, onSuccess }: Cre
       id: "premium",
       name: "Premium Pack",
       credits: 100,
-      price: 80.00,
-      pricePerCredit: 0.80,
+      price: 80.0,
+      pricePerCredit: 0.8,
       savings: "Save 20%",
       description: "Best value",
     },
@@ -78,8 +88,8 @@ export function CreditsModal({ isOpen, onClose, currentCredits, onSuccess }: Cre
       id: "ultimate",
       name: "Ultimate Pack",
       credits: 250,
-      price: 175.00,
-      pricePerCredit: 0.70,
+      price: 175.0,
+      pricePerCredit: 0.7,
       savings: "Save 30%",
       description: "For power users",
     },
@@ -89,32 +99,56 @@ export function CreditsModal({ isOpen, onClose, currentCredits, onSuccess }: Cre
     if (!user) return;
 
     setLoading(true);
+    setError(null);
+
     try {
       const token = await getToken();
-      const response = await fetch('/api/payments/checkout-session', {
-        method: 'POST',
+      const response = await fetch("/api/payments/checkout-session", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ credits }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to create checkout session');
+        // Check if it's a registration error
+        if (response.status === 403 && data.code === "USER_NOT_REGISTERED") {
+          setError(
+            "You need to complete your registration before purchasing credits."
+          );
+
+          // Redirect to onboarding after 2 seconds
+          setTimeout(() => {
+            router.push(`/${lang}/onboarding/preferences`);
+          }, 2000);
+          return;
+        }
+
+        throw new Error(data.error || "Failed to create checkout session");
       }
 
-      const data = await response.json();
-      
+      // Guardar el session ID antes de redirigir
+      if (data.data?.sessionId) {
+        sessionStorage.setItem("lastCheckoutSessionId", data.data.sessionId);
+      }
+
       // Redirigir a Stripe Checkout
       if (data.data?.url) {
         // Guardar la URL actual para regresar después del pago
-        sessionStorage.setItem('checkoutReturnUrl', pathname);
+        sessionStorage.setItem("checkoutReturnUrl", pathname);
         window.location.href = data.data.url;
       }
     } catch (error) {
-      console.error('Error creating checkout session:', error);
-      alert('Error creating checkout session. Please try again.');
+      console.error("Error creating checkout session:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Error creating checkout session. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -140,10 +174,20 @@ export function CreditsModal({ isOpen, onClose, currentCredits, onSuccess }: Cre
           </DialogDescription>
         </DialogHeader>
 
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         {/* Current balance */}
         <div className="bg-muted/50 rounded-lg p-4 mb-4">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Current Balance</span>
+            <span className="text-sm text-muted-foreground">
+              Current Balance
+            </span>
             <div className="flex items-center gap-2">
               <Coins className="h-4 w-4 text-primary" />
               <span className="font-bold text-lg">{currentCredits} Points</span>
@@ -164,6 +208,7 @@ export function CreditsModal({ isOpen, onClose, currentCredits, onSuccess }: Cre
               onClick={() => {
                 setSelectedPackage(pkg.id);
                 setCustomAmount("");
+                setError(null);
               }}
             >
               {pkg.popular && (
@@ -172,7 +217,7 @@ export function CreditsModal({ isOpen, onClose, currentCredits, onSuccess }: Cre
                   Popular
                 </Badge>
               )}
-              
+
               <div className="space-y-2">
                 <h3 className="font-semibold">{pkg.name}</h3>
                 <div className="flex items-baseline gap-1">
@@ -187,7 +232,9 @@ export function CreditsModal({ isOpen, onClose, currentCredits, onSuccess }: Cre
                     {pkg.savings}
                   </Badge>
                 )}
-                <p className="text-xs text-muted-foreground">{pkg.description}</p>
+                <p className="text-xs text-muted-foreground">
+                  {pkg.description}
+                </p>
               </div>
             </Card>
           ))}
@@ -204,6 +251,7 @@ export function CreditsModal({ isOpen, onClose, currentCredits, onSuccess }: Cre
               onChange={(e) => {
                 setCustomAmount(e.target.value);
                 setSelectedPackage(null);
+                setError(null);
               }}
               min="1"
               max="1000"
@@ -218,7 +266,7 @@ export function CreditsModal({ isOpen, onClose, currentCredits, onSuccess }: Cre
           </div>
           {customAmount && parseInt(customAmount) > 0 && (
             <p className="text-sm text-muted-foreground">
-              Total: ${(parseInt(customAmount) * 1.00).toFixed(2)} (${1.00}/point)
+              Total: ${(parseInt(customAmount) * 1.0).toFixed(2)} (${1.0}/point)
             </p>
           )}
         </div>
@@ -230,7 +278,7 @@ export function CreditsModal({ isOpen, onClose, currentCredits, onSuccess }: Cre
           </Button>
           <Button
             onClick={() => {
-              const pkg = packages.find(p => p.id === selectedPackage);
+              const pkg = packages.find((p) => p.id === selectedPackage);
               if (pkg) handlePurchase(pkg.credits);
             }}
             disabled={!selectedPackage || loading}
@@ -241,7 +289,10 @@ export function CreditsModal({ isOpen, onClose, currentCredits, onSuccess }: Cre
             ) : (
               <>
                 <Sparkles className="h-4 w-4 mr-2" />
-                Buy {selectedPackage && packages.find(p => p.id === selectedPackage)?.credits} Points
+                Buy{" "}
+                {selectedPackage &&
+                  packages.find((p) => p.id === selectedPackage)?.credits}{" "}
+                Points
               </>
             )}
           </Button>
