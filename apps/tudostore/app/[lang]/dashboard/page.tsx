@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser, useAuth } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Image from "next/image";
@@ -35,7 +35,6 @@ interface DashboardProps {
 export default function Dashboard({ params }: DashboardProps) {
   const { lang } = use(params);
   const { user: clerkUser, isLoaded, isSignedIn } = useUser();
-  const { getToken } = useAuth();
   const router = useRouter();
   const api = useApiWithAuth();
   
@@ -44,7 +43,7 @@ export default function Dashboard({ params }: DashboardProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [hasFetched, setHasFetched] = useState(false);
-  const [debugToken, setDebugToken] = useState<string | null>(null);
+
 
   // Fetch user data from API
   useEffect(() => {
@@ -59,17 +58,6 @@ export default function Dashboard({ params }: DashboardProps) {
         setHasFetched(true);
         
         console.log('📊 Fetching user data from API...');
-        console.log('🔍 Look for the FULL JWT TOKEN in the console above ⬆️');
-        
-        // Capture token for debugging
-        try {
-          const token = await getToken();
-          setDebugToken(token);
-          console.log('🎯 DEBUG TOKEN SET IN STATE');
-        } catch (e) {
-          console.log('Could not get token for debugging:', e);
-        }
-        
         const result = await api.getCurrentUser();
         
         if (result.success && result.data) {
@@ -183,19 +171,6 @@ export default function Dashboard({ params }: DashboardProps) {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        
-        {/* 🚨 TEMPORAL: Debug Token Display */}
-        {debugToken && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
-            <h3 className="text-sm font-medium text-yellow-800 mb-2">🎯 DEBUG: JWT Token (TEMPORARY)</h3>
-            <div className="bg-white p-3 rounded border font-mono text-xs break-all select-all cursor-text">
-              {debugToken}
-            </div>
-            <p className="text-xs text-yellow-700 mt-2">
-              💡 Click to select all, then copy (Ctrl+C) to use in Postman/Curl
-            </p>
-          </div>
-        )}
         {/* User Header */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
           <div className="flex items-start justify-between">

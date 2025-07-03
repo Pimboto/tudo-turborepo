@@ -185,6 +185,8 @@ class ApiService {
     }, token);
   }
 
+
+
   // User endpoints
   updateProfile = async (
     profileData: Partial<UserProfile>, 
@@ -233,15 +235,6 @@ export function useApiWithAuth() {
         tokenType: typeof token,
         tokenStart: token ? token.substring(0, 10) : 'null'
       });
-
-      // 🚨 TEMPORAL: JWT completo para debugging/testing
-      if (token) {
-        console.log('🎯 FULL JWT TOKEN (for manual testing):');
-        console.log('======================================');
-        console.log(token);
-        console.log('======================================');
-        console.log('💡 Copy this token to test manually in Postman/curl');
-      }
       
       if (!token) {
         console.error('❌ No token received from Clerk');

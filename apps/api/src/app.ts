@@ -26,8 +26,9 @@ export const createApp = (): Express => {
   app.use(cors({
     origin: [
       process.env.CLIENT_URL ?? 'http://localhost:3000',
-      process.env.PARTNER_URL ?? 'http://localhost:3001', 
-      process.env.ADMIN_URL ?? 'http://localhost:3002',
+      'http://localhost:3000',
+      process.env.PARTNER_URL ?? 'http://localhost:3002', 
+      process.env.ADMIN_URL ?? 'http://localhost:3003',
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -38,11 +39,27 @@ export const createApp = (): Express => {
   app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
+
+
+  // Clerk middleware configuration
+  const clerkConfig: any = {
+    // Authorized parties for multi-domain SSO
+    authorizedParties: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      ...(process.env.CLERK_AUTHORIZED_PARTIES?.split(',') || [])
+    ],
+    // Enable debug mode for development
+    debug: process.env.NODE_ENV === 'development'
+  };
+
+  // Add publishable key if available
+  if (process.env.CLERK_PUBLISHABLE_KEY) {
+    clerkConfig.publishableKey = process.env.CLERK_PUBLISHABLE_KEY;
+  }
+
   // Clerk middleware - MUST come after body parser
-  app.use(clerkMiddleware({
-    // Optional: Add authorized parties for multi-domain SSO
-    authorizedParties: process.env.CLERK_AUTHORIZED_PARTIES?.split(',') || []
-  }));
+  app.use(clerkMiddleware(clerkConfig));
 
   // Request timing
   app.use(morgan('tiny', {
